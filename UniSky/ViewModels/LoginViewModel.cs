@@ -55,13 +55,15 @@ public partial class LoginViewModel : ViewModelBase
         using var context = GetLoadingContext();
         try
         {
-            var normalisedHost = new UriBuilder(Host)
-                .Host.ToLowerInvariant();
+            var host = Advanced
+                ? new Uri(Host)
+                : await ResolveHostAsync(Username).ConfigureAwait(false);
+            var normalisedHost = host.Host.ToLowerInvariant();
 
             var builder = new ATProtocolBuilder()
                 .EnableAutoRenewSession(true)
                 .WithUserAgent(Constants.UserAgent)
-                .WithInstanceUrl(new Uri(Host))
+                .WithInstanceUrl(host)
                 .WithLogger(loggerFactory.CreateLogger("ATProtocol_Login"));
 
             using var protocol = builder.Build();
@@ -97,6 +99,27 @@ public partial class LoginViewModel : ViewModelBase
             syncContext.Post(() =>
                  Error = new ExceptionViewModel(ex));
         }
+    }
+
+    private async Task<Uri> ResolveHostAsync(string username)
+    {
+        if (username.Contains('@'))
+            return new Uri(Host);
+
+        using var discoveryProtocol = new ATProtocolBuilder()
+            .WithUserAgent(Constants.UserAgent)
+            .WithLogger(loggerFactory.CreateLogger("ATProtocol_Discovery"))
+            .Build();
+
+        var resolvedHost = (await discoveryProtocol
+            .ResolveATIdentifierToHostAddressAsync(new ATHandle(username), CancellationToken.None)
+            .ConfigureAwait(false))
+            .HandleResult();
+
+        if (!Uri.TryCreate(resolvedHost, UriKind.Absolute, out var host))
+            throw new InvalidOperationException("Unable to find the server for this Bluesky handle.");
+
+        return host;
     }
 
     [RelayCommand]
