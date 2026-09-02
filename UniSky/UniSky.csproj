@@ -296,6 +296,9 @@
     <Compile Include="Pages\ListsPage.xaml.cs">
       <DependentUpon>ListsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\ListPage.xaml.cs">
+      <DependentUpon>ListPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\NotificationsPage.xaml.cs">
       <DependentUpon>NotificationsPage.xaml</DependentUpon>
     </Compile>
@@ -421,6 +424,11 @@
     <Compile Include="ViewModels\Feeds\FeedItemCollection.cs" />
     <Compile Include="ViewModels\FeedsViewModel.cs" />
     <Compile Include="ViewModels\Feeds\FeedViewModel.cs" />
+    <Compile Include="ViewModels\Lists\ListMemberCollection.cs" />
+    <Compile Include="ViewModels\Lists\ListPageViewModel.cs" />
+    <Compile Include="ViewModels\Lists\ListsCollection.cs" />
+    <Compile Include="ViewModels\Lists\ListsPageViewModel.cs" />
+    <Compile Include="ViewModels\Lists\UserListViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\RootViewModel.cs" />
@@ -647,6 +655,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\ListsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\ListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

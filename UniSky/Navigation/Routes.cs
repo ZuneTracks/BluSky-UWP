@@ -1,5 +1,6 @@
 using FishyFlip.Lexicon;
 using FishyFlip.Lexicon.App.Bsky.Feed;
+using FishyFlip.Lexicon.App.Bsky.Graph;
 using FishyFlip.Models;
 using UniSky.Services.Navigation;
 
@@ -37,6 +38,11 @@ public static class Routes
         => post?.Uri == null ? null : Thread(post.Uri, post);
 
     public static NavigationRequest Feed(ATUri uri, GeneratorView payload = null)
+        => NavigationRoute.TryFromAtUri(uri, out var route)
+            ? new NavigationRequest(route) { Payload = payload }
+            : null;
+
+    public static NavigationRequest List(ATUri uri, ListView payload = null)
         => NavigationRoute.TryFromAtUri(uri, out var route)
             ? new NavigationRequest(route) { Payload = payload }
             : null;

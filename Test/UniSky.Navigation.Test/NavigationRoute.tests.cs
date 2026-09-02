@@ -217,6 +217,7 @@ public class NavigationRouteTests
     [Theory]
     [InlineData("unisky:///profile/did:plc:vwzwgnygau7ed7b7wt5ux7y2")]
     [InlineData("unisky:///profile/did:plc:vwzwgnygau7ed7b7wt5ux7y2/post/3kabcxyz1a22b")]
+    [InlineData("unisky:///profile/did:plc:vwzwgnygau7ed7b7wt5ux7y2/lists/3kabcxyz1a22b")]
     [InlineData("unisky:///notifications")]
     [InlineData("unisky:///bookmarks")]
     [InlineData("unisky:///tag/catstodon")]
