@@ -81,6 +81,16 @@ public class NavigationRouteTests
         Assert.Equal(plural, singular);
     }
 
+    [Theory]
+    [InlineData("unisky:///profile/did:plc:vwzwgnygau7ed7b7wt5ux7y2/feed/3kabcxyz1a22b")]
+    [InlineData("https://bsky.app/profile/did:plc:vwzwgnygau7ed7b7wt5ux7y2/feed/3kabcxyz1a22b")]
+    public void FeedLinksParseToFeedRoutes(string input)
+    {
+        Assert.True(NavigationRoute.TryParse(input, out var route));
+        Assert.Equal(NavigationRoute.Feed(Did, Rkey), route);
+        Assert.Equal(RouteKinds.Feed, route.Kind);
+    }
+
     #endregion
 
     #region Malformed input
@@ -276,6 +286,15 @@ public class NavigationRouteTests
 
         Assert.True(route.TryToAtUri(out var uri));
         Assert.Equal($"at://{Did}/app.bsky.feed.post/{Rkey}", uri.ToString());
+    }
+
+    [Fact]
+    public void FeedRoutesConvertBackToARecordUri()
+    {
+        var route = NavigationRoute.Feed(Did, Rkey);
+
+        Assert.True(route.TryToAtUri(out var uri));
+        Assert.Equal($"at://{Did}/app.bsky.feed.generator/{Rkey}", uri.ToString());
     }
 
     [Fact]

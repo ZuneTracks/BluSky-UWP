@@ -14,6 +14,7 @@ internal class RouteTable : IRouteTable
     {
         Map(RouteKinds.Profile, typeof(ProfilePage));
         Map(RouteKinds.Post, typeof(ThreadPage));
+        Map(RouteKinds.Feed, typeof(FeedsPage));
     }
 
     public void Map(string kind, Type pageType)

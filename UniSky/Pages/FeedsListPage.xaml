@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:UniSky.Pages"
     xmlns:extensions="using:UniSky.Extensions"
+    xmlns:viewmodels="using:UniSky.ViewModels"
+    xmlns:feeds="using:UniSky.ViewModels.Feeds"
+    xmlns:controls="using:UniSky.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:w1803="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 6)"
@@ -11,7 +14,7 @@
     NavigationCacheMode="Required"
     w1803:KeyboardAcceleratorPlacementMode="Hidden">
 
-    <Grid>
+    <Grid x:Name="RootPage">
         <Grid.RowDefinitions>
             <RowDefinition x:Name="TitleBarPadding" Height="0"/>
             <RowDefinition Height="Auto"/>
@@ -34,28 +37,80 @@
                        Style="{ThemeResource BaseTextBlockStyle}"/>
         </Border>
 
-        <Grid Grid.Row="2"
-              MaxWidth="600"
-              Margin="24,80,24,0"
-              VerticalAlignment="Top"
-              HorizontalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="&#xE728;"
-                       FontSize="48"
-                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                       VerticalAlignment="Center"/>
-            <StackPanel Margin="16,0,0,0" VerticalAlignment="Center" Grid.Column="1">
-                <TextBlock x:Uid="FeedsListPageNotSupportedTitle"
-                    TextWrapping="Wrap"
-                    Text="Feeds aren't supported yet!"
-                    Style="{ThemeResource TitleTextBlockStyle}"/>
-                <TextBlock x:Uid="PageNotSupportedSubtitle"
-                    Text="We're working on it! Check back later."
-                    Style="{ThemeResource BodyTextBlockStyle}"/>
-            </StackPanel>
+        <Grid Grid.Row="2" MaxWidth="600">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Padding="24,20,24,40" Spacing="12">
+                    <TextBlock Text="SAVED FEEDS" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <TextBlock Text="Save feeds here to add them to your home timeline."
+                               Style="{ThemeResource BodyTextBlockStyle}"
+                               TextWrapping="Wrap"/>
+
+                    <TextBlock Text="You have not saved any custom feeds yet."
+                               Visibility="{x:Bind ViewModel.HasSavedFeeds, Mode=OneWay, Converter={StaticResource VisibilityConverter}, ConverterParameter=Invert}"
+                               Style="{ThemeResource BodyTextBlockStyle}"/>
+
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.SavedFeeds, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="feeds:FeedGeneratorViewModel">
+                                <Grid Padding="0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Bind Name}" Style="{ThemeResource SubtitleTextBlockStyle}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{x:Bind Description}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" MaxLines="2"/>
+                                        <TextBlock Text="{x:Bind Creator}" Style="{ThemeResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0"
+                                            Command="{Binding DataContext.OpenFeedCommand, ElementName=RootPage}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="2" Content="Remove" Margin="8,0,0,0"
+                                            Command="{Binding DataContext.RemoveFeedCommand, ElementName=RootPage}"
+                                            CommandParameter="{Binding}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="ADD A FEED" Margin="0,16,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <TextBox PlaceholderText="Paste a Bluesky feed link or at:// URI"
+                             Text="{x:Bind ViewModel.CustomFeedUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="Save feed" HorizontalAlignment="Left"
+                            Command="{x:Bind ViewModel.AddCustomFeedCommand}"/>
+
+                    <TextBlock Text="SUGGESTED FEEDS" Margin="0,16,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.SuggestedFeeds, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="feeds:FeedGeneratorViewModel">
+                                <Grid Padding="0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Bind Name}" Style="{ThemeResource SubtitleTextBlockStyle}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{x:Bind Description}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" MaxLines="2"/>
+                                        <TextBlock Text="{x:Bind Creator}" Style="{ThemeResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0"
+                                            Command="{Binding DataContext.OpenFeedCommand, ElementName=RootPage}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="2" Content="Save" Margin="8,0,0,0"
+                                            Command="{Binding DataContext.SaveFeedCommand, ElementName=RootPage}"
+                                            CommandParameter="{Binding}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+
+            <controls:LoadErrorControl Title="Failed to load feeds"
+                                       Error="{x:Bind ViewModel.Error, Mode=OneWay}"
+                                       RetryCommand="{x:Bind ViewModel.RefreshCommand, Mode=OneWay}"/>
         </Grid>
 
         <VisualStateManager.VisualStateGroups>

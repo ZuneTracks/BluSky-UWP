@@ -419,7 +419,9 @@
     <Compile Include="ViewModels\Error\ATErrorViewModel.cs" />
     <Compile Include="ViewModels\Error\ErrorViewModel.cs" />
     <Compile Include="ViewModels\Feeds\FeedItemCollection.cs" />
+    <Compile Include="ViewModels\Feeds\FeedGeneratorViewModel.cs" />
     <Compile Include="ViewModels\FeedsViewModel.cs" />
+    <Compile Include="ViewModels\FeedsListViewModel.cs" />
     <Compile Include="ViewModels\Feeds\FeedViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />

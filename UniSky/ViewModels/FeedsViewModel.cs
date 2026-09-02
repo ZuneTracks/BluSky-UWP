@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using UniSky.Controls.Compose;
 using UniSky.Extensions;
+using UniSky.Models.Feeds;
 using UniSky.Services;
 using UniSky.Services.Navigation;
 using UniSky.ViewModels.Feeds;
@@ -23,6 +24,8 @@ public partial class FeedsViewModel : ViewModelBase
 {
     private readonly IProtocolService protocolService;
     private readonly ILogger<FeedsViewModel> logger;
+    private readonly ATUri requestedFeedUri;
+    private readonly GeneratorView requestedFeed;
 
     [ObservableProperty]
     private int selectedFeed;
@@ -30,11 +33,15 @@ public partial class FeedsViewModel : ViewModelBase
     public FeedsViewModel(
         INavigationContext navigation,
         IProtocolService protocolService,
-        ILogger<FeedsViewModel> logger)
+        ILogger<FeedsViewModel> logger,
+        ATUri requestedFeedUri = null,
+        GeneratorView requestedFeed = null)
         : base(navigation)
     {
         this.protocolService = protocolService;
         this.logger = logger;
+        this.requestedFeedUri = requestedFeedUri;
+        this.requestedFeed = requestedFeed;
 
         Feeds = [];
 
@@ -55,50 +62,50 @@ public partial class FeedsViewModel : ViewModelBase
         try
         {
             var protocol = protocolService.Protocol;
+            if (requestedFeedUri != null)
+            {
+                var generator = requestedFeed;
+                if (generator == null)
+                {
+                    var result = (await protocol.GetFeedGeneratorsAsync([requestedFeedUri])
+                        .ConfigureAwait(false))
+                        .HandleResult();
+                    generator = result.Feeds?.FirstOrDefault(feed => feed.Uri.ToString() == requestedFeedUri.ToString());
+                }
+
+                if (generator == null)
+                    throw new InvalidOperationException("The requested feed could not be found.");
+
+                syncContext.Post(() =>
+                    Feeds.Add(new FeedViewModel(Navigation, FeedType.Custom, generator.Uri, generator, protocolService)));
+                return;
+            }
+
             var prefs = (await protocol.GetPreferencesAsync()
                 .ConfigureAwait(false))
                 .HandleResult();
 
-            var feeds = prefs.Preferences
-                .OfType<SavedFeedsPrefV2>()
-                .FirstOrDefault()?.Items
-                .Where(p => p.Pinned == true);
-
-            var generatedFeeds = feeds.Where(s => s.TypeValue == "feed")
-                .Select(s => new ATUri(s.Value))
-                .ToList();
-
-            var generators = (await protocol.GetFeedGeneratorsAsync(generatedFeeds)
-                .ConfigureAwait(false))
-                .HandleResult();
+            var generatedFeeds = SavedFeedPreferences.GetPinnedFeedUris(prefs.Preferences);
+            var generators = generatedFeeds.Count == 0
+                ? []
+                : ((await protocol.GetFeedGeneratorsAsync(generatedFeeds.ToList())
+                    .ConfigureAwait(false))
+                    .HandleResult()
+                    .Feeds ?? []);
+            var generatorsByUri = generators.ToDictionary(feed => feed.Uri.ToString(), StringComparer.Ordinal);
 
             syncContext.Post(() =>
             {
-                // TODO: this _all_ sucks and needs to be cached
-                foreach (var feed in feeds)
+                foreach (var feedUri in generatedFeeds)
                 {
-                    if (feed.TypeValue == "feed")
+                    if (generatorsByUri.TryGetValue(feedUri.ToString(), out var generatedFeed))
                     {
-                        var generatedFeed = generators.Feeds
-                            .FirstOrDefault(f => f.Uri.ToString() == feed.Value);
-
-                        if (generatedFeed == null)
-                        {
-                            logger.LogWarning("Didn't find {Type} for {Uri}", GeneratorView.RecordType, feed.Value);
-                            continue;
-                        }
-
                         Feeds.Add(new FeedViewModel(Navigation, FeedType.Custom, generatedFeed.Uri, generatedFeed, this.protocolService));
                     }
-                    else if (feed is { TypeValue: "timeline", Value: "following" })
-                    {
-                        Feeds.Add(new FeedViewModel(Navigation, FeedType.Following, null, null, this.protocolService));
-                    }
-                    else
-                    {
-                        logger.LogWarning("Unknown feed type {TypeValue} ({Value})", feed.TypeValue, feed.Value);
-                    }
                 }
+
+                if (Feeds.Count == 0)
+                    Feeds.Add(new FeedViewModel(Navigation, FeedType.Following, null, null, this.protocolService));
             });
         }
         catch (Exception ex)

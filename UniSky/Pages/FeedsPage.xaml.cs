@@ -16,6 +16,8 @@ namespace UniSky.Pages;
 
 public sealed partial class FeedsPage : Page, IScrollToTop
 {
+    private NavigationRoute currentRoute;
+
     public FeedsViewModel ViewModel
     {
         get => (FeedsViewModel)GetValue(ViewModelProperty);
@@ -33,12 +35,32 @@ public sealed partial class FeedsPage : Page, IScrollToTop
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-        
-        if (this.ViewModel == null)
-            this.ViewModel = ActivatorUtilities.CreateInstance<FeedsViewModel>(ServiceContainer.Scoped, NavigationScopeHost.FindFor(this.Frame));
+
+        var request = e.Parameter as NavigationRequest;
+        var route = request?.Route;
+        if (this.ViewModel == null || !Equals(currentRoute, route))
+        {
+            currentRoute = route;
+            var scope = NavigationScopeHost.FindFor(this.Frame);
+            if (route?.Kind == RouteKinds.Feed && route.TryToAtUri(out var uri))
+            {
+                this.ViewModel = ActivatorUtilities.CreateInstance<FeedsViewModel>(
+                    ServiceContainer.Scoped, scope, uri, request.Payload as FishyFlip.Lexicon.App.Bsky.Feed.GeneratorView);
+            }
+            else
+            {
+                this.ViewModel = ActivatorUtilities.CreateInstance<FeedsViewModel>(ServiceContainer.Scoped, scope);
+            }
+        }
 
         var safeAreaService = ServiceContainer.Scoped.GetRequiredService<ISafeAreaService>();
         safeAreaService.SafeAreaUpdated += OnSafeAreaUpdated;
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        ServiceContainer.Scoped.GetRequiredService<ISafeAreaService>().SafeAreaUpdated -= OnSafeAreaUpdated;
     }
 
     private void OnSafeAreaUpdated(object sender, SafeAreaUpdatedEventArgs e)

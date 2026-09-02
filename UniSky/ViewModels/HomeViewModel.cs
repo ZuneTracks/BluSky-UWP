@@ -149,6 +149,7 @@ public partial class HomeViewModel : ViewModelBase
         HomePages? target = args.Request.Route.Kind switch
         {
             RouteKinds.Home => HomePages.Home,
+            RouteKinds.Feed => HomePages.Home,
             RouteKinds.Search => HomePages.Search,
             RouteKinds.Notifications => HomePages.Notifications,
             RouteKinds.Bookmarks => HomePages.Bookmarks,
@@ -159,7 +160,9 @@ public partial class HomeViewModel : ViewModelBase
             return;
 
         SelectedMenuItem = item;
-        args.Handled = true;
+        args.Handled = args.Request.Route.Kind == RouteKinds.Feed
+            ? item.Scope?.Navigate(args.Request) ?? false
+            : true;
     }
 
     private async Task LoadAsync()
