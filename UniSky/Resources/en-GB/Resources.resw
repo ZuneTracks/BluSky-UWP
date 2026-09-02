@@ -415,11 +415,14 @@
     <value>Server</value>
   </data>
   <data name="LoginPageHeader.Text" xml:space="preserve">
-    <value>To begin, enter your username and password.</value>
+    <value>To begin, enter your username and password.&#x0a;&#x0a;If your account uses two-factor authentication, sign in with a Bluesky App Password.</value>
     <comment>Taken from Windows XP's Welcome Screen, try to keep that reference if possible :)</comment>
   </data>
   <data name="LoginPasswordBox.Header" xml:space="preserve">
     <value>Password</value>
+  </data>
+  <data name="LoginAppPasswordNote.Text" xml:space="preserve">
+    <value>If your account uses two-factor authentication, sign in with a Bluesky App Password.</value>
   </data>
   <data name="LoginUsernameBox.Header" xml:space="preserve">
     <value>Username or Email Address</value>

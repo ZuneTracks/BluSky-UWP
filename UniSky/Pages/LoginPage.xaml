@@ -74,7 +74,7 @@
                 </Viewbox>
                 <TextBlock x:Name="LoginText"
                            x:Uid="LoginPageHeader"
-                           Text="To begin, enter your username and password." 
+                           Text="To begin, enter your username and password.&#x0a;&#x0a;If your account uses two-factor authentication, sign in with a Bluesky App Password."
                            TextWrapping="Wrap"/>
             </StackPanel>
 

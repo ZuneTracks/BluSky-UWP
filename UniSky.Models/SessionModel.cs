@@ -1,8 +1,40 @@
 ﻿using System;
+using System.Buffers;
 using System.Text.Json.Serialization;
 using FishyFlip.Models;
 
 namespace UniSky.Models;
+
+/// <summary>
+/// Rents a buffer from the shared pool and guarantees it is returned exactly once.
+/// </summary>
+internal ref struct PooledBuffer
+{
+    private byte[] _array;
+
+    public PooledBuffer(int minimumLength)
+    {
+        _array = ArrayPool<byte>.Shared.Rent(minimumLength);
+        Length = minimumLength;
+    }
+
+    public int Length { get; }
+
+    public Span<byte> Span
+        => _array is null
+            ? throw new ObjectDisposedException(nameof(PooledBuffer))
+            : _array.AsSpan(0, Length);
+
+    public void Dispose()
+    {
+        // Null out first so a second Dispose is a harmless no-op.
+        var array = _array;
+        _array = null;
+
+        if (array is not null)
+            ArrayPool<byte>.Shared.Return(array, clearArray: true);
+    }
+}
 
 public record class SessionModel
 {

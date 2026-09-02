@@ -4,6 +4,7 @@ using Humanizer.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using UniSky.Extensions;
+using UniSky.Helpers;
 using UniSky.Helpers.Localisation;
 using UniSky.Navigation;
 using UniSky.Services;
@@ -43,6 +44,7 @@ sealed partial class App : Application
         _logger = ServiceContainer.Default.GetRequiredService<ILoggerFactory>()
             .CreateLogger<App>();
         _settings = ServiceContainer.Default.GetRequiredService<ITypedSettings>();
+        _ = DiagnosticLog.WriteAsync($"Application initialized. Version: {Package.Current.Id.Version}");
 
         if (_settings.RequestedColourScheme != ElementTheme.Default)
         {
@@ -65,6 +67,7 @@ sealed partial class App : Application
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         _logger.LogError(e.Exception, "Unhandled exception!!");
+        _ = DiagnosticLog.WriteExceptionAsync("Unhandled UWP exception", e.Exception);
 
         // hate this
         e.Handled = true;
@@ -83,6 +86,7 @@ sealed partial class App : Application
         collection.AddSingleton<INotificationsService, BackgroundNotificationsService>();
         collection.AddSingleton<IModerationService, ModerationService>();
         collection.AddSingleton<INotificationFeedService, NotificationFeedService>();
+        collection.AddSingleton<IChatService, ChatService>();
         collection.AddSingleton<IContentRevealService, ContentRevealService>();
         collection.AddSingleton<IEmbedExtractor, AngleSharpEmbedExtractor>();
         collection.AddSingleton<IImageCompressionService, ImageCompressionService>();

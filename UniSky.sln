@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.7.11925.98 stable
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37614.0 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniSky", "UniSky\UniSky.csproj", "{FEBDF715-48BB-46F2-ABC6-6FF32131B5B0}"
 EndProject

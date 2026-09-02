@@ -341,11 +341,14 @@
     <value>Serwer</value>
   </data>
   <data name="LoginPageHeader.Text" xml:space="preserve">
-    <value>Żeby zacząć, podaj swoją nazwę użytkownika i hasło</value>
+    <value>Żeby zacząć, podaj swoją nazwę użytkownika i hasło&#x0a;&#x0a;Jeśli Twoje konto używa uwierzytelniania dwuskładnikowego, zaloguj się za pomocą hasła aplikacji Bluesky.</value>
     <comment>Wzięte z ekranu powitalnego Windows'a XP, spróbuj zachować te odniesienie jak możliwe :)</comment>
   </data>
   <data name="LoginPasswordBox.Header" xml:space="preserve">
     <value>Hasło</value>
+  </data>
+  <data name="LoginAppPasswordNote.Text" xml:space="preserve">
+    <value>Jeśli Twoje konto używa uwierzytelniania dwuskładnikowego, zaloguj się za pomocą hasła aplikacji Bluesky.</value>
   </data>
   <data name="LoginUsernameBox.Header" xml:space="preserve">
     <value>Nazwa Użytkownika lub Adres Email</value>
