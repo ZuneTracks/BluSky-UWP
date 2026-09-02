@@ -103,7 +103,7 @@ public partial class LoginViewModel : ViewModelBase
 
     private async Task<Uri> ResolveHostAsync(string username)
     {
-        if (username.Contains('@'))
+        if (username.Contains("@"))
             return new Uri(Host);
 
         using var discoveryProtocol = new ATProtocolBuilder()
