@@ -1,34 +1,33 @@
 <Page
-    x:Class="UniSky.Pages.ListsPage"
+    x:Class="UniSky.Pages.ListPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:extensions="using:UniSky.Extensions"
     xmlns:lists="using:UniSky.ViewModels.Lists"
-    NavigationCacheMode="Required"
+    xmlns:profiles="using:UniSky.ViewModels.Profile"
     Loaded="Page_Loaded">
 
     <Page.Resources>
-        <DataTemplate x:Key="ListItemTemplate" x:DataType="lists:UserListViewModel">
-            <Button Style="{ThemeResource CleanButtonStyle}" Command="{Binding OpenListCommand}">
-                <Grid Margin="12,10">
+        <DataTemplate x:Key="MemberTemplate" x:DataType="profiles:ProfileViewModel">
+            <Button Style="{ThemeResource CleanButtonStyle}" Command="{Binding OpenProfileCommand}">
+                <Grid Margin="12,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Border Width="48" Height="48" Margin="0,0,12,0"
-                            Background="{ThemeResource SystemAccentColorDark1}">
-                        <Image Source="{Binding AvatarUrl}" Stretch="UniformToFill"/>
-                    </Border>
+                    <Ellipse Width="42" Height="42" Margin="0,0,12,0">
+                        <Ellipse.Fill>
+                            <ImageBrush ImageSource="{Binding AvatarUrl}"/>
+                        </Ellipse.Fill>
+                    </Ellipse>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Name}"
                                    Style="{ThemeResource BaseTextBlockStyle}"
                                    TextWrapping="NoWrap"
                                    TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding Description}"
+                        <TextBlock Text="{Binding Handle}"
                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                   Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-                                   MaxLines="2"
-                                   TextWrapping="Wrap"/>
+                                   Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
                     </StackPanel>
                 </Grid>
             </Button>
@@ -45,49 +44,30 @@
             <Grid.RowDefinitions>
                 <RowDefinition x:Name="TitleBarPadding" Height="0"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Border x:Name="HeaderBackground"
-                    Grid.RowSpan="2"
+                    Grid.RowSpan="3"
                     Background="{ThemeResource GenericPageHeaderBackgroundBrush}"
                     BorderBrush="{ThemeResource SystemControlRevealSeparatorBrush}"
                     extensions:Hairline.BorderThickness="1,0,1,1"/>
-            <Border Grid.Row="1" Padding="{ThemeResource GenericPageHeaderMargin}">
-                <TextBlock x:Uid="ListsPageTitleBlock"
-                           Margin="12,4,12,12"
-                           Text="LISTS"
-                           Style="{ThemeResource BaseTextBlockStyle}"/>
-            </Border>
+            <TextBlock Grid.Row="1"
+                       Margin="24,8,24,4"
+                       Text="{x:Bind ViewModel.Name, Mode=OneWay}"
+                       Style="{ThemeResource TitleTextBlockStyle}"
+                       TextTrimming="CharacterEllipsis"/>
+            <TextBlock Grid.Row="2"
+                       Margin="24,0,24,12"
+                       Text="{x:Bind ViewModel.Description, Mode=OneWay}"
+                       Style="{ThemeResource BodyTextBlockStyle}"
+                       TextWrapping="Wrap"/>
         </Grid>
 
         <ListView x:Name="RootList"
                   Grid.Row="1"
                   Style="{StaticResource FeedListViewStyle}"
-                  ItemsSource="{x:Bind ViewModel.Lists, Mode=OneWay}"
-                  ItemTemplate="{StaticResource ListItemTemplate}"/>
-
-        <Grid x:Name="NoItemsGrid"
-              x:Load="{x:Bind ViewModel.IsEmpty, Mode=OneWay}"
-              Grid.Row="1"
-              MaxWidth="600"
-              Margin="24,80,24,0"
-              VerticalAlignment="Top"
-              HorizontalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="&#xE71D;"
-                       FontSize="48"
-                       FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                       VerticalAlignment="Center"/>
-            <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="No lists yet"
-                           TextWrapping="Wrap"
-                           Style="{ThemeResource TitleTextBlockStyle}"/>
-                <TextBlock Text="Lists you create will appear here."
-                           Style="{ThemeResource BodyTextBlockStyle}"/>
-            </StackPanel>
-        </Grid>
+                  ItemsSource="{x:Bind ViewModel.Members, Mode=OneWay}"
+                  ItemTemplate="{StaticResource MemberTemplate}"/>
 
         <ProgressBar Grid.Row="1"
                      MaxWidth="600"

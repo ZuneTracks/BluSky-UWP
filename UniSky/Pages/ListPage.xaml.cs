@@ -6,21 +6,22 @@ using UniSky.ViewModels.Lists;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using GraphListView = FishyFlip.Lexicon.App.Bsky.Graph.ListView;
 
 namespace UniSky.Pages;
 
-public sealed partial class ListsPage : Page
+public sealed partial class ListPage : Page
 {
-    public ListsPageViewModel ViewModel
+    public ListPageViewModel ViewModel
     {
-        get => (ListsPageViewModel)GetValue(ViewModelProperty);
+        get => (ListPageViewModel)GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
     }
 
     public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(ViewModel), typeof(ListsPageViewModel), typeof(ListsPage), new PropertyMetadata(null));
+        DependencyProperty.Register(nameof(ViewModel), typeof(ListPageViewModel), typeof(ListPage), new PropertyMetadata(null));
 
-    public ListsPage()
+    public ListPage()
     {
         InitializeComponent();
     }
@@ -33,10 +34,17 @@ public sealed partial class ListsPage : Page
         safeAreaService.SetTitlebarTheme(ElementTheme.Default);
         safeAreaService.SafeAreaUpdated += OnSafeAreaUpdated;
 
+        if (e.Parameter is not NavigationRequest request || !request.Route.TryToAtUri(out var uri))
+            return;
+
         if (ViewModel == null)
-            DataContext = ViewModel = ActivatorUtilities.CreateInstance<ListsPageViewModel>(
+        {
+            DataContext = ViewModel = ActivatorUtilities.CreateInstance<ListPageViewModel>(
                 ServiceContainer.Scoped,
-                NavigationScopeHost.FindFor(Frame));
+                NavigationScopeHost.FindFor(Frame),
+                uri,
+                request.Payload as GraphListView);
+        }
     }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -53,8 +61,9 @@ public sealed partial class ListsPage : Page
             : new GridLength(e.SafeArea.Bounds.Top);
     }
 
-    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    private void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await ViewModel.Lists.RefreshAsync();
+        if (ViewModel?.Members is { HasMoreItems: true } members)
+            _ = members.LoadMoreItemsAsync(25);
     }
 }
