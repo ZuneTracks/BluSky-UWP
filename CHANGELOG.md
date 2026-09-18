@@ -19,6 +19,7 @@
 
 - Updated the application package version to `1.1.1.0`.
 - Retained Windows 10 Mobile compatibility with a minimum supported build of `15063`.
+- Adopted the independent `ZuneTracks.BluSkyUWP` package identity and `bluskyuwp:` deep-link scheme. This is a separate app from prior UniSky packages and does not migrate their local data.
 
 ### Notes
 

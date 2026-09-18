@@ -10,11 +10,11 @@
   IgnorableNamespaces="uap mp uap5 rescap uap18">
 
   <Identity
-    Name="24101WamWooWamRD.25225E497690B"
+    Name="ZuneTracks.BluSkyUWP"
     Publisher="CN=ZuneTracks"
     Version="1.1.1.0" />
 
-  <mp:PhoneIdentity PhoneProductId="d3ae258d-7752-4bdb-bb0c-b6cca57f9cd1" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="5583c2d0-d6f0-4338-85f8-0c8bee55b410" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>BluSky UWP</DisplayName>
@@ -56,7 +56,7 @@
       </uap:VisualElements>
       <Extensions>
         <uap:Extension Category="windows.protocol">
-          <uap:Protocol Name="unisky">
+          <uap:Protocol Name="bluskyuwp">
             <uap:DisplayName>BluSky UWP</uap:DisplayName>
             <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
           </uap:Protocol>
