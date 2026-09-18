@@ -116,8 +116,16 @@ public partial class LoginViewModel : ViewModelBase
             .ConfigureAwait(false))
             .HandleResult();
 
-        if (!Uri.TryCreate(resolvedHost, UriKind.Absolute, out var host))
+        if (string.IsNullOrWhiteSpace(resolvedHost))
             throw new InvalidOperationException("Unable to find the server for this Bluesky handle.");
+
+        // Handle resolution can return a bare host (e.g. "pds.example.com") rather than a
+        // full URL, which would otherwise fail absolute URI parsing for custom domains.
+        if (!resolvedHost.Contains("://"))
+            resolvedHost = "https://" + resolvedHost;
+
+        if (!Uri.TryCreate(resolvedHost, UriKind.Absolute, out var host))
+            throw new InvalidOperationException($"'{resolvedHost}' is not a valid server address for this Bluesky handle.");
 
         return host;
     }
