@@ -1,4 +1,4 @@
-# Unisky
+# Unisky UWP
 A [Bluesky](https://bsky.app) client for Windows 10 & Windows 10 Mobile. Built with [FishyFlip](https://drasticactions.github.io/FishyFlip/) and forked from the original UniSky! 
 
 Requires Windows 10 build 15063 or later, please make sure your device is up to date!
