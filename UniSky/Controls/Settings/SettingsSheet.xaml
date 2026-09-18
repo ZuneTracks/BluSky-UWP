@@ -100,6 +100,9 @@
             <TextBlock TextWrapping="Wrap">
                 Icon by <Hyperlink NavigateUri="https://bsky.app/profile/xubiod.net">@xubiod.net</Hyperlink> &lt;3
             </TextBlock>
+            <TextBlock TextWrapping="Wrap">
+                This version is forked and modified by <Hyperlink NavigateUri="https://github.com/ZuneTracks/UniSky-UWP">ZuneTracks</Hyperlink>.
+            </TextBlock>
             <TextBlock TextWrapping="Wrap" Text="{Binding InstallId}"/>
         </StackPanel>        
     </ScrollViewer>
