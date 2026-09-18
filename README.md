@@ -3,6 +3,8 @@ A [Bluesky](https://bsky.app) client for Windows 10 & Windows 10 Mobile. Built w
 
 See the [latest release](https://github.com/ZuneTracks/UniSky-UWP/releases)!
 
+Read the [Privacy Policy](PRIVACY.md).
+
 Requires Windows 10 build 15063 or later, please make sure your device is up to date!
 
 ## News

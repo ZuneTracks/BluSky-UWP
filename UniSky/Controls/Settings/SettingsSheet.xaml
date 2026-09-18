@@ -103,6 +103,9 @@
             <TextBlock TextWrapping="Wrap">
                 BluSky UWP is forked and modified by <Hyperlink NavigateUri="https://github.com/ZuneTracks/UniSky-UWP">ZuneTracks</Hyperlink>.
             </TextBlock>
+            <TextBlock TextWrapping="Wrap">
+                <Hyperlink NavigateUri="https://github.com/ZuneTracks/BluSky-UWP/blob/Main/PRIVACY.md">Privacy Policy</Hyperlink>
+            </TextBlock>
             <TextBlock TextWrapping="Wrap" Text="{Binding InstallId}"/>
         </StackPanel>        
     </ScrollViewer>
