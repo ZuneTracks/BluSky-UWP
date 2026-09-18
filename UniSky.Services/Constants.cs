@@ -27,10 +27,10 @@ public static class Constants
     }
 
     public static string UserAgent
-        => $"UniSky/{Version} (https://github.com/UnicordDev/UniSky)";
+        => $"BluSky UWP/{Version} (https://github.com/ZuneTracks/UniSky-UWP)";
 
     public static string CrawlerUserAgent
-        => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 UniSky/{Version} (https://github.com/UnicordDev/UniSky)";
+        => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 BluSky UWP/{Version} (https://github.com/ZuneTracks/UniSky-UWP)";
 
     public static class Settings
     {

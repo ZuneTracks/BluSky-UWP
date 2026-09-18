@@ -13,7 +13,7 @@
 - Handle discovery now accepts server responses that omit the `https://` scheme.
 - Sign-in identifier validation uses a Windows 10 Mobile-compatible check.
 - Saved-feed loading handles absent or empty preferences and falls back to the Following timeline.
-- Package display names use the literal `UniSky` value instead of exposing `ms-resource` text on unsupported or fallback locales.
+- Package display names use the literal `BluSky UWP` value instead of exposing `ms-resource` text on unsupported or fallback locales.
 
 ### Changed
 

@@ -153,10 +153,10 @@
     <value>Odpowiadanie do</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Unisky</value>
+    <value>BluSky UWP</value>
   </data>
   <data name="AppTitle.Text" xml:space="preserve">
-    <value>Unisky</value>
+    <value>BluSky UWP</value>
   </data>
   <data name="TimeUnit_Day" xml:space="preserve">
     <value>d</value>
@@ -401,7 +401,7 @@
     <value>URUCHOMNIENIE PONOWNE POTRZEBNE</value>
   </data>
   <data name="SettingsNeedsRelaunchInfoBlock.Text" xml:space="preserve">
-    <value>Unisky musi być uruchomione ponownie żeby niektóre zmiany miały efekt. Czy chcesz uruchomić ponownie teraz?</value>
+    <value>BluSky UWP musi być uruchomione ponownie żeby niektóre zmiany miały efekt. Czy chcesz uruchomić ponownie teraz?</value>
   </data>
   <data name="SettingsOptionsHeaderBlock.Text" xml:space="preserve">
     <value>Opcje</value>

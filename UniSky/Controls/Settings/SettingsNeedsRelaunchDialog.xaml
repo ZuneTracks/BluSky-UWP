@@ -13,6 +13,6 @@
     SecondaryButtonText="Later">
 
     <TextBlock x:Uid="SettingsNeedsRelaunchInfoBlock"
-               Text="Unisky must be restarted for some changes to take effect. Do you want to relaunch now?"
+               Text="BluSky UWP must be restarted for some changes to take effect. Do you want to relaunch now?"
                TextWrapping="WrapWholeWords"/>
 </ContentDialog>

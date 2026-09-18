@@ -1,4 +1,4 @@
-# Unisky
+# BluSky UWP
 A [Bluesky](https://bsky.app) client for Windows 10 & Windows 10 Mobile. Built with [FishyFlip](https://drasticactions.github.io/FishyFlip/)! 
 
 ## Downloads
@@ -6,7 +6,7 @@ A [Bluesky](https://bsky.app) client for Windows 10 & Windows 10 Mobile. Built w
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
 </a>
 
-See the [latest release](https://github.com/UnicordDev/UniSky/releases)!
+See the [latest release](https://github.com/ZuneTracks/UniSky-UWP/releases)!
 
 Requires Windows 10 build 15063 or later, please make sure your device is up to date!
 
@@ -36,4 +36,4 @@ Before submitting contribtuions, please ensure all configurations build. A handy
 On one specific note, while the project technically targets a minimum of Windows 10 version 1709 (Fall Creators Update), all code should compile and run on version 170**3** (Creators Update) to maintain Windows Phone support. Please pay special attention to the minimum required Windows version when consuming UWP APIs, and be careful when consuming .NET Standard 2.0 APIs, which may require a newer Windows version.
 
 ## Contributing
-Unisky accepts contributions! Want a feature that doesn't already exist? Feel free to dig right in and give it a shot. Do be mindful of other ongoing projects, make sure someone isn't already building the feature you want, etc. If you don't have the know how yourself, file an issue, someone might pick up on it.
+BluSky UWP accepts contributions! Want a feature that doesn't already exist? Feel free to dig right in and give it a shot. Do be mindful of other ongoing projects, make sure someone isn't already building the feature you want, etc. If you don't have the know how yourself, file an issue, someone might pick up on it.

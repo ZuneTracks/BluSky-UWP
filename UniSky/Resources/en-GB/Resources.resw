@@ -153,10 +153,10 @@
     <value>Replying to</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>Unisky</value>
+    <value>BluSky UWP</value>
   </data>
   <data name="AppTitle.Text" xml:space="preserve">
-    <value>Unisky</value>
+    <value>BluSky UWP</value>
   </data>
   <data name="TimeUnit_Day" xml:space="preserve">
     <value>d</value>
@@ -499,7 +499,7 @@
     <value>RESTART REQUIRED</value>
   </data>
   <data name="SettingsNeedsRelaunchInfoBlock.Text" xml:space="preserve">
-    <value>Unisky must be restarted for some changes to take effect. Do you want to restart now?</value>
+    <value>BluSky UWP must be restarted for some changes to take effect. Do you want to restart now?</value>
   </data>
   <data name="SettingsOptionsHeaderBlock.Text" xml:space="preserve">
     <value>Options</value>
