@@ -12,7 +12,7 @@
   <Identity
     Name="ZuneTracks.BluSkyUWP"
     Publisher="CN=ZuneTracks"
-    Version="1.1.1.0" />
+    Version="1.2.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="5583c2d0-d6f0-4338-85f8-0c8bee55b410" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
