@@ -69,8 +69,8 @@
                          MaxWidth="125" 
                          Margin="0,0,0,16"
                          CacheMode="BitmapCache">
-                    <Path Data="{StaticResource BlueSkyLogoPath}"
-                          Fill="{ThemeResource ApplicationForegroundThemeBrush}"/>
+                    <Image Source="ms-appx:///Assets/Square150x150Logo.png"
+                           Stretch="Uniform"/>
                 </Viewbox>
                 <TextBlock x:Name="LoginText"
                            x:Uid="LoginPageHeader"

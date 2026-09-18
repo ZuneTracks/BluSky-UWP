@@ -5,6 +5,7 @@
 ### Fixed
 
 - Removed the Microsoft Store-restricted `confirmAppClose` capability from Store packages.
+- Replaced the old extended-splash logo with the BluSky UWP splash artwork.
 
 ### Changed
 

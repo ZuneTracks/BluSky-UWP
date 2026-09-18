@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using UniSky.Helpers.Composition;
 using UniSky.Navigation;
 using UniSky.Services;
 using UniSky.Services.Navigation;
 using UniSky.ViewModels;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using System;
 
@@ -78,8 +78,18 @@ public sealed partial class RootPage : Page
 
             dismissed = true;
             ExtendedProgressRing.IsActive = false;
-            ExtendedSplashPath.Visibility = Visibility.Collapsed;
-            BirdAnimation.RunBirdAnimation(ExtendedSplashBackground, ExtendedSplashImage, RootFrame, () => ExtendedSplash.Visibility = Visibility.Collapsed);
+            var fade = new DoubleAnimation
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(300),
+            };
+
+            fade.Completed += (sender, args) => ExtendedSplash.Visibility = Visibility.Collapsed;
+            Storyboard.SetTarget(fade, ExtendedSplash);
+            Storyboard.SetTargetProperty(fade, "Opacity");
+            var storyboard = new Storyboard();
+            storyboard.Children.Add(fade);
+            storyboard.Begin();
         });
     }
 }
