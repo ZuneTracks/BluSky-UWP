@@ -5,6 +5,7 @@
 ### Fixed
 
 - Removed the Microsoft Store-restricted `confirmAppClose` capability from Store packages.
+- Made normal Release deployments use the managed runtime so their deploy layout includes the app assembly required at startup.
 
 ### Changed
 
