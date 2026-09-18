@@ -4,7 +4,7 @@ A [Bluesky](https://bsky.app) client for Windows 10 & Windows 10 Mobile. Built w
 Requires Windows 10 build 15063 or later, please make sure your device is up to date!
 
 ## News
-I post updates semi-frequently on BlueSky itself! Follow me [@wamwoowam.co.uk](https://bsky.app/profile/wamwoowam.co.uk) to stay updated.
+You can follow me on BlueSky https://bsky.app/profile/ndtech.dev
 
 ## Building
 ### Prerequisites
