@@ -2,6 +2,10 @@
 
 ## 1.2.1 - 2026-09-18
 
+### Fixed
+
+- Removed the Microsoft Store-restricted `confirmAppClose` capability from Store packages.
+
 ### Changed
 
 - Increased the application package version to `1.2.1.0` so it updates the existing `1.2.0.0` BluSky UWP installation.

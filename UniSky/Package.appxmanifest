@@ -5,9 +5,8 @@
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
-  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   xmlns:uap18="http://schemas.microsoft.com/appx/manifest/uap/windows10/18"
-  IgnorableNamespaces="uap mp uap5 rescap uap18">
+  IgnorableNamespaces="uap mp uap5 uap18">
 
   <Identity
     Name="ZuneTracks.BluSkyUWP"
@@ -73,6 +72,5 @@
 
   <Capabilities>
     <Capability Name="internetClient" />
-    <rescap:Capability Name="confirmAppClose" />
   </Capabilities>
 </Package>

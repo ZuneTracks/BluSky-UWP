@@ -2,9 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using UniSky.Controls.Overlay;
-using Windows.Foundation.Metadata;
 using Windows.UI.Core;
-using Windows.UI.Core.Preview;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -46,12 +44,6 @@ internal class ApplicationViewOverlayController : IOverlayController
 
         var systemNavigationManager = SystemNavigationManager.GetForCurrentView();
         systemNavigationManager.BackRequested += OnBackRequested;
-
-        if (ApiInformation.IsTypePresent(typeof(SystemNavigationManagerPreview).FullName))
-        {
-            var systemNavigationManagerPreview = SystemNavigationManagerPreview.GetForCurrentView();
-            systemNavigationManagerPreview.CloseRequested += OnCloseRequested;
-        }
 
         var coreWindow = CoreWindow.GetForCurrentThread();
         coreWindow.SizeChanged += OnWindowSizeChanged;
@@ -128,15 +120,6 @@ internal class ApplicationViewOverlayController : IOverlayController
     {
         e.Handled = true;
         await TryHideAsync();
-    }
-
-    private async void OnCloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
-    {
-        var deferral = e.GetDeferral();
-        if (!await control.InvokeHidingAsync())
-            e.Handled = true;
-
-        deferral.Complete();
     }
 
     private void OnWindowClosed(object sender, CoreWindowEventArgs e)
