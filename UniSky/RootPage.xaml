@@ -47,8 +47,20 @@
                 <Grid x:Name="ExtendedSplashImage" 
                       Width="620"
                       Height="300">
-                    <Image Source="ms-appx:///Assets/SplashScreen.png"
-                           Stretch="Uniform"/>
+                    <Viewbox Width="100"
+                             Height="100"
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Center"
+                             CacheMode="BitmapCache">
+                        <Grid>
+                            <Path x:Name="ExtendedSplashPath1"
+                                  Data="{StaticResource BlueSkyLogoPath}"
+                                  Fill="{ThemeResource ApplicationPageBackgroundThemeBrush}"/>
+                            <Path x:Name="ExtendedSplashPath"
+                                  Data="{StaticResource BlueSkyLogoPath}"
+                                  Fill="White"/>
+                        </Grid>
+                    </Viewbox>
                 </Grid>
             </Viewbox>
             <ProgressRing x:Name="ExtendedProgressRing"
