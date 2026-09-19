@@ -6,6 +6,7 @@
 
 - Removed the Microsoft Store-restricted `confirmAppClose` capability from Store packages.
 - Replaced the old extended-splash logo with the BluSky UWP splash artwork.
+- Made normal Release deployments use the managed runtime so their deploy layout includes the app assembly required at startup.
 
 ### Changed
 
