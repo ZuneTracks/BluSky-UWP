@@ -125,7 +125,7 @@
                                Stretch="Uniform"/>
                     </Viewbox>
 
-                    <TextBlock Text="Unisky"
+                    <TextBlock Text="BluSky UWP"
                                Style="{ThemeResource CaptionTextBlockStyle}" 
                                VerticalAlignment="Center" 
                                Grid.Column="1"
