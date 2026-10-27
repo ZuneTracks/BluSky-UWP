@@ -52,14 +52,8 @@
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center"
                              CacheMode="BitmapCache">
-                        <Grid>
-                            <Path x:Name="ExtendedSplashPath1"
-                                  Data="{StaticResource BlueSkyLogoPath}"
-                                  Fill="{ThemeResource ApplicationPageBackgroundThemeBrush}"/>
-                            <Path x:Name="ExtendedSplashPath"
-                                  Data="{StaticResource BlueSkyLogoPath}"
-                                  Fill="White"/>
-                        </Grid>
+                        <Image Source="ms-appx:///Assets/Square150x150Logo.png"
+                               Stretch="Uniform"/>
                     </Viewbox>
                 </Grid>
             </Viewbox>
