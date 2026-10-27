@@ -7,6 +7,7 @@
 - Removed the Microsoft Store-restricted `confirmAppClose` capability from Store packages.
 - Replaced the inherited extended-splash logo with the BluSky UWP artwork.
 - Removed obsolete original-icon attribution from Settings/About.
+- Added correctly qualified, enlarged unplated taskbar icon variants for Windows 11.
 
 ### Changed
 
