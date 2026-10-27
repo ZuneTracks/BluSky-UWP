@@ -47,9 +47,8 @@
                                      Grid.Column="1"
                                      IsHitTestVisible="False"
                                      CacheMode="BitmapCache">
-                                <Path x:Name="AppIconPath"
-                                      Data="{StaticResource BlueSkyLogoPath}"
-                                      Fill="{ThemeResource ApplicationForegroundThemeBrush}"/>
+                                <Image Source="ms-appx:///Assets/Square44x44Logo.targetsize-24_altform-unplated.png"
+                                       Stretch="Uniform"/>
                             </Viewbox>
 
                             <TextBlock x:Name="AppTitleTextBlock"
@@ -76,14 +75,12 @@
                             <VisualStateGroup>
                                 <VisualState x:Name="Active">
                                     <VisualState.Setters>
-                                        <Setter Target="AppIconPath.Fill" Value="{ThemeResource ApplicationForegroundThemeBrush}"/>
                                         <Setter Target="AppTitleTextBlock.Foreground" Value="{ThemeResource ApplicationForegroundThemeBrush}"/>
                                         <Setter Target="AppTitleSuffixTextBlock.Foreground" Value="{ThemeResource ApplicationForegroundThemeBrush}"/>
                                     </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Inactive">
                                     <VisualState.Setters>
-                                        <Setter Target="AppIconPath.Fill" Value="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
                                         <Setter Target="AppTitleTextBlock.Foreground" Value="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
                                         <Setter Target="AppTitleSuffixTextBlock.Foreground" Value="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
                                     </VisualState.Setters>

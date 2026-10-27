@@ -8,6 +8,7 @@
 - Replaced the inherited extended-splash logo with the BluSky UWP artwork.
 - Removed obsolete original-icon attribution from Settings/About.
 - Added correctly qualified, enlarged unplated taskbar icon variants for Windows 11.
+- Replaced inherited title-bar and mobile navigation logos with the BluSky UWP icon.
 
 ### Changed
 

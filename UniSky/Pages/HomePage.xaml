@@ -121,8 +121,8 @@
                              Margin="8,2,0,0"
                              Width="16"
                              Height="16">
-                        <Path Data="{StaticResource BlueSkyLogoPath}"
-                             Fill="{ThemeResource ApplicationForegroundThemeBrush}"/>
+                        <Image Source="ms-appx:///Assets/Square44x44Logo.targetsize-24_altform-unplated.png"
+                               Stretch="Uniform"/>
                     </Viewbox>
 
                     <TextBlock Text="Unisky"
