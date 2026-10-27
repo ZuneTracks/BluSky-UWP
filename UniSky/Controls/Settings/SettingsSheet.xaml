@@ -98,9 +98,6 @@
                 <Run Text="{x:Bind root:Constants.Version, FallbackValue='1.0.0.0-abcdefg'}"/>
             </TextBlock>
             <TextBlock TextWrapping="Wrap">
-                Icon by <Hyperlink NavigateUri="https://bsky.app/profile/xubiod.net">@xubiod.net</Hyperlink> &lt;3
-            </TextBlock>
-            <TextBlock TextWrapping="Wrap">
                 BluSky UWP is forked and modified by <Hyperlink NavigateUri="https://github.com/ZuneTracks/UniSky-UWP">ZuneTracks</Hyperlink>.
             </TextBlock>
             <TextBlock TextWrapping="Wrap">
