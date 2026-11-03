@@ -1,15 +1,15 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("UniSky")]
+[assembly: AssemblyTitle("BluSky UWP")]
 [assembly: AssemblyDescription("UWP Client for BlueSky")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Wan Kerr Co. Ltd.")]
-[assembly: AssemblyProduct("UniSky")]
-[assembly: AssemblyCopyright("Copyright © Wan Kerr Co. Ltd. 2024")]
+[assembly: AssemblyCompany("ZuneTracks")]
+[assembly: AssemblyProduct("BluSky UWP")]
+[assembly: AssemblyCopyright("Copyright © ZuneTracks 2026; based on UniSky © 2024 Thomas May, UniSky Contributors")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
