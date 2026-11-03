@@ -7,12 +7,18 @@
     xmlns:viewmodels="using:UniSky.ViewModels"
     xmlns:feeds="using:UniSky.ViewModels.Feeds"
     xmlns:controls="using:UniSky.Controls"
+    xmlns:converters="using:UniSky.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:w1709="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 5)"
     xmlns:w1803="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 6)"
     mc:Ignorable="d"
     NavigationCacheMode="Required"
     w1803:KeyboardAcceleratorPlacementMode="Hidden">
+
+    <Page.Resources>
+        <converters:VisibilityConverter x:Key="VisibilityConverter"/>
+    </Page.Resources>
 
     <Grid x:Name="RootPage">
         <Grid.RowDefinitions>
@@ -39,7 +45,7 @@
 
         <Grid Grid.Row="2" MaxWidth="600">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Padding="24,20,24,40" Spacing="12">
+                <StackPanel Padding="24,20,24,40" w1709:Spacing="12">
                     <TextBlock Text="SAVED FEEDS" Style="{ThemeResource BaseTextBlockStyle}"/>
                     <TextBlock Text="Save feeds here to add them to your home timeline."
                                Style="{ThemeResource BodyTextBlockStyle}"
