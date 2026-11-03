@@ -47,7 +47,7 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Padding="24,20,24,40" w1709:Spacing="12">
                     <TextBlock Text="SAVED FEEDS" Style="{ThemeResource BaseTextBlockStyle}"/>
-                    <TextBlock Text="Save feeds here to add them to your home timeline."
+                    <TextBlock Text="Pinned feeds appear as tabs on your home timeline. Unpinned feeds stay saved here."
                                Style="{ThemeResource BodyTextBlockStyle}"
                                TextWrapping="Wrap"/>
 
@@ -63,16 +63,24 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="{x:Bind Name}" Style="{ThemeResource SubtitleTextBlockStyle}" TextWrapping="Wrap"/>
                                         <TextBlock Text="{x:Bind Description}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" MaxLines="2"/>
                                         <TextBlock Text="{x:Bind Creator}" Style="{ThemeResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="PINNED"
+                                                   Foreground="{ThemeResource SystemControlForegroundAccentBrush}"
+                                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                                   Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource VisibilityConverter}}"/>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0"
+                                    <Button Grid.Column="1" Content="Open" Margin="12,0,0,0" VerticalAlignment="Top"
                                             Command="{Binding DataContext.OpenFeedCommand, ElementName=RootPage}"
                                             CommandParameter="{Binding}"/>
-                                    <Button Grid.Column="2" Content="Remove" Margin="8,0,0,0"
+                                    <Button Grid.Column="2" Content="{x:Bind PinLabel, Mode=OneWay}" Margin="8,0,0,0" VerticalAlignment="Top"
+                                            Command="{Binding DataContext.TogglePinCommand, ElementName=RootPage}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Grid.Column="3" Content="Remove" Margin="8,0,0,0" VerticalAlignment="Top"
                                             Command="{Binding DataContext.RemoveFeedCommand, ElementName=RootPage}"
                                             CommandParameter="{Binding}"/>
                                 </Grid>
@@ -86,7 +94,29 @@
                     <Button Content="Save feed" HorizontalAlignment="Left"
                             Command="{x:Bind ViewModel.AddCustomFeedCommand}"/>
 
-                    <TextBlock Text="SUGGESTED FEEDS" Margin="0,16,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <TextBlock Text="FIND FEEDS" Margin="0,16,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="SearchBox"
+                                 PlaceholderText="Search feeds"
+                                 InputScope="Search"
+                                 KeyDown="SearchBox_KeyDown"
+                                 Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Grid.Column="1" Content="Search" Margin="8,0,0,0"
+                                Command="{x:Bind ViewModel.SearchCommand}"/>
+                        <Button Grid.Column="2" Content="Clear" Margin="8,0,0,0"
+                                Visibility="{x:Bind ViewModel.IsSearching, Mode=OneWay, Converter={StaticResource VisibilityConverter}}"
+                                Command="{x:Bind ViewModel.ClearSearchCommand}"/>
+                    </Grid>
+
+                    <TextBlock Text="{x:Bind ViewModel.DiscoverHeader, Mode=OneWay}" Margin="0,8,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <TextBlock Text="No feeds matched your search."
+                               Visibility="{x:Bind ViewModel.HasNoResults, Mode=OneWay, Converter={StaticResource VisibilityConverter}}"
+                               Style="{ThemeResource BodyTextBlockStyle}"/>
                     <ItemsControl ItemsSource="{x:Bind ViewModel.SuggestedFeeds, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="feeds:FeedGeneratorViewModel">
@@ -111,6 +141,13 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <ProgressRing IsActive="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay}"
+                                  Visibility="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay, Converter={StaticResource VisibilityConverter}}"
+                                  HorizontalAlignment="Center"/>
+                    <Button Content="Load more" HorizontalAlignment="Center"
+                            Visibility="{x:Bind ViewModel.HasMoreFeeds, Mode=OneWay, Converter={StaticResource VisibilityConverter}}"
+                            Command="{x:Bind ViewModel.LoadMoreCommand}"/>
                 </StackPanel>
             </ScrollViewer>
 

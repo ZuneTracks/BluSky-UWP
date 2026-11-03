@@ -2,8 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using UniSky.Services;
 using UniSky.Navigation;
 using UniSky.ViewModels;
+using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
 namespace UniSky.Pages;
@@ -43,6 +45,15 @@ public sealed partial class FeedsListPage : Page
 
         var safeAreaService = ServiceContainer.Scoped.GetRequiredService<ISafeAreaService>();
         safeAreaService.SafeAreaUpdated -= OnSafeAreaUpdated;
+    }
+
+    private void SearchBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key != VirtualKey.Enter)
+            return;
+
+        e.Handled = true;
+        ViewModel?.SearchCommand.Execute(null);
     }
 
     private void OnSafeAreaUpdated(object sender, SafeAreaUpdatedEventArgs e)

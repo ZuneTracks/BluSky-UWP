@@ -1,13 +1,19 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using FishyFlip.Lexicon.App.Bsky.Feed;
 using FishyFlip.Models;
 
 namespace UniSky.ViewModels.Feeds;
 
-public sealed class FeedGeneratorViewModel
+public sealed partial class FeedGeneratorViewModel : ObservableObject
 {
-    public FeedGeneratorViewModel(GeneratorView generator)
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PinLabel))]
+    private bool isPinned;
+
+    public FeedGeneratorViewModel(GeneratorView generator, bool isPinned = false)
     {
         Generator = generator;
+        this.isPinned = isPinned;
     }
 
     public GeneratorView Generator { get; }
@@ -23,4 +29,6 @@ public sealed class FeedGeneratorViewModel
         => Generator.Creator is { } creator
             ? creator.DisplayName ?? creator.Handle.ToString()
             : string.Empty;
+
+    public string PinLabel => IsPinned ? "Unpin" : "Pin";
 }

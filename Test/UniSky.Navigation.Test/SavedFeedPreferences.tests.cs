@@ -51,6 +51,36 @@ public class SavedFeedPreferencesTests
     }
 
     [Fact]
+    public void Saved_feeds_include_unpinned_feeds_and_unpinning_keeps_them_saved()
+    {
+        var other = ATUri.Create("at://did:plc:feed/app.bsky.feed.generator/other");
+        List<ATObject> preferences =
+        [
+            new SavedFeedsPrefV2
+            {
+                Items =
+                [
+                    new SavedFeed { Id = "a", TypeValue = "timeline", Value = "following", Pinned = true },
+                    new SavedFeed { Id = "b", TypeValue = "feed", Value = FeedUri.ToString(), Pinned = true },
+                    new SavedFeed { Id = "c", TypeValue = "feed", Value = other.ToString(), Pinned = false }
+                ]
+            }
+        ];
+
+        var saved = SavedFeedPreferences.GetSavedFeeds(preferences);
+        Assert.Equal(2, saved.Count);
+        Assert.True(saved[0].Pinned);
+        Assert.False(saved[1].Pinned);
+
+        var unpinned = SavedFeedPreferences.WithFeedPinned(preferences, FeedUri, false);
+        Assert.Empty(SavedFeedPreferences.GetPinnedFeedUris(unpinned));
+        Assert.Equal(2, SavedFeedPreferences.GetSavedFeeds(unpinned).Count);
+
+        var repinned = SavedFeedPreferences.WithFeedPinned(unpinned, other, true);
+        Assert.Equal(other.ToString(), Assert.Single(SavedFeedPreferences.GetPinnedFeedUris(repinned)).ToString());
+    }
+
+    [Fact]
     public void Removing_a_feed_preserves_other_saved_feed_entries()
     {
         var following = new SavedFeed { TypeValue = "timeline", Value = "following", Pinned = true };

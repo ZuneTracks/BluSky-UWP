@@ -27,6 +27,41 @@ public static class SavedFeedPreferences
             .ToList();
     }
 
+    /// <summary>
+    /// All saved custom feeds (pinned or not), in the user's saved order.
+    /// </summary>
+    public static IReadOnlyList<SavedFeedEntry> GetSavedFeeds(IEnumerable<ATObject>? preferences)
+    {
+        var items = preferences?
+            .OfType<SavedFeedsPrefV2>()
+            .SelectMany(preference => preference.Items ?? [])
+            ?? [];
+
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var result = new List<SavedFeedEntry>();
+        foreach (var item in items)
+        {
+            if (item.TypeValue != "feed" || !ATUri.TryCreate(item.Value, out var uri) || uri == null || !seen.Add(uri.ToString()))
+                continue;
+
+            result.Add(new SavedFeedEntry(uri, item.Pinned == true));
+        }
+
+        return result;
+    }
+
+    public static List<ATObject> WithFeedPinned(IEnumerable<ATObject>? preferences, ATUri uri, bool pinned)
+    {
+        if (uri == null)
+            throw new ArgumentNullException(nameof(uri));
+
+        return Update(preferences, items =>
+        {
+            foreach (var item in items.Where(item => IsFeed(item, uri)))
+                item.Pinned = pinned;
+        });
+    }
+
     public static List<ATObject> WithPinnedFeed(IEnumerable<ATObject>? preferences, ATUri uri)
     {
         if (uri == null)
@@ -119,4 +154,17 @@ public static class SavedFeedPreferences
     private static bool IsFeed(SavedFeed item, ATUri uri)
         => item.TypeValue == "feed"
             && string.Equals(item.Value, uri.ToString(), StringComparison.Ordinal);
+}
+
+public sealed class SavedFeedEntry
+{
+    public SavedFeedEntry(ATUri uri, bool pinned)
+    {
+        Uri = uri;
+        Pinned = pinned;
+    }
+
+    public ATUri Uri { get; }
+
+    public bool Pinned { get; }
 }
