@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using FishyFlip;
 using FishyFlip.Lexicon;
 using FishyFlip.Lexicon.App.Bsky.Actor;
@@ -15,6 +16,7 @@ using FishyFlip.Models;
 using FishyFlip.Tools;
 using Microsoft.Extensions.Logging;
 using UniSky.Extensions;
+using UniSky.Messages;
 using UniSky.Models.Feeds;
 using UniSky.Navigation;
 using UniSky.Services;
@@ -368,6 +370,7 @@ public partial class FeedsListViewModel : ViewModelBase
             .HandleResult();
 
         preferences = updatedPreferences;
+        syncContext.Post(() => WeakReferenceMessenger.Default.Send(new PinnedFeedsChangedMessage()));
     }
 
     private FeedGeneratorViewModel FindSaved(ATUri uri)

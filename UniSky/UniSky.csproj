@@ -336,6 +336,7 @@
     <Compile Include="Helpers\UrlHelpers.cs" />
     <Compile Include="Helpers\WebPHelpers.cs" />
     <Compile Include="Messages\MarkAsReadNotification.cs" />
+    <Compile Include="Messages\PinnedFeedsChangedMessage.cs" />
     <Compile Include="Pages\BookmarksPage.xaml.cs">
       <DependentUpon>BookmarksPage.xaml</DependentUpon>
     </Compile>

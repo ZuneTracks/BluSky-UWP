@@ -49,6 +49,10 @@ public partial class FeedViewModel : ViewModelBase
         this.Items = new FeedItemCollection(this, type, id);
     }
 
+    public FeedType Type => type;
+
+    public ATUri? FeedUri => id;
+
     [RelayCommand]
     public async Task RefreshAsync(Deferral? deferral = null)
     {
