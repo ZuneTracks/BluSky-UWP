@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -479,6 +479,10 @@
     <Compile Include="ViewModels\FeedsListViewModel.cs" />
     <Compile Include="ViewModels\Feeds\FeedViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListMemberCollection.cs" />
+    <Compile Include="Controls\Lists\AddToListsDialog.cs" />
+    <Compile Include="Controls\Lists\EditListDialog.cs" />
+    <Compile Include="ViewModels\Lists\ListActions.cs" />
+    <Compile Include="ViewModels\Lists\ListMemberViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListPageViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListsCollection.cs" />
     <Compile Include="ViewModels\Lists\ListsPageViewModel.cs" />

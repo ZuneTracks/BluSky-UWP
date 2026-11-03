@@ -1,4 +1,6 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
+using UniSky.Controls.Lists;
 using UniSky.Navigation;
 using UniSky.Services;
 using UniSky.Services.Navigation;
@@ -56,5 +58,21 @@ public sealed partial class ListsPage : Page
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         await ViewModel.Lists.RefreshAsync();
+    }
+
+    private async void NewListButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new EditListDialog(true);
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            return;
+
+        try
+        {
+            await ViewModel.CreateListAsync(dialog.Purpose, dialog.ListName, dialog.ListDescription);
+        }
+        catch (Exception ex)
+        {
+            await ListDialogs.ShowErrorAsync("Couldn't create list", ex);
+        }
     }
 }

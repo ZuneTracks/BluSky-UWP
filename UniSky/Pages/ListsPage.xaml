@@ -52,10 +52,27 @@
                     BorderBrush="{ThemeResource SystemControlRevealSeparatorBrush}"
                     extensions:Hairline.BorderThickness="1,0,1,1"/>
             <Border Grid.Row="1" Padding="{ThemeResource GenericPageHeaderMargin}">
-                <TextBlock x:Uid="ListsPageTitleBlock"
-                           Margin="12,4,12,12"
-                           Text="LISTS"
-                           Style="{ThemeResource BaseTextBlockStyle}"/>
+                <Grid>
+                    <TextBlock x:Uid="ListsPageTitleBlock"
+                               Margin="12,4,12,12"
+                               Text="LISTS"
+                               VerticalAlignment="Center"
+                               Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <Button x:Name="NewListButton"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,0,12,8"
+                            Style="{ThemeResource ButtonRevealStyle}"
+                            Background="Transparent"
+                            AutomationProperties.Name="New list"
+                            ToolTipService.ToolTip="New list"
+                            Click="NewListButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <SymbolIcon Symbol="Add"/>
+                            <TextBlock Text="New list" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
             </Border>
         </Grid>
 

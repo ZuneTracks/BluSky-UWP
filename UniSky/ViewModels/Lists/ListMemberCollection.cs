@@ -9,7 +9,6 @@ using FishyFlip.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using UniSky.Moderation;
 using UniSky.Services;
-using UniSky.ViewModels.Profile;
 using Windows.Foundation;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -17,7 +16,7 @@ using Windows.UI.Xaml.Data;
 
 namespace UniSky.ViewModels.Lists;
 
-public sealed class ListMemberCollection : ObservableCollection<ProfileViewModel>, ISupportIncrementalLoading
+public sealed class ListMemberCollection : ObservableCollection<ListMemberViewModel>, ISupportIncrementalLoading
 {
     private readonly SemaphoreSlim semaphore = new(1, 1);
     private readonly CoreDispatcher dispatcher = Window.Current.Dispatcher;
@@ -35,6 +34,25 @@ public sealed class ListMemberCollection : ObservableCollection<ProfileViewModel
     }
 
     public bool HasMoreItems { get; private set; } = true;
+
+    public bool ContainsMember(ATDid did)
+        => did != null && ids.Contains(did.ToString());
+
+    internal void InsertMember(ListMemberViewModel member)
+    {
+        if (member.Did == null || !ids.Add(member.Did.ToString()))
+            return;
+
+        Insert(0, member);
+    }
+
+    internal void RemoveMember(ListMemberViewModel member)
+    {
+        if (member.Did != null)
+            ids.Remove(member.Did.ToString());
+
+        Remove(member);
+    }
 
     public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
         => Task.Run(async () =>
@@ -82,7 +100,7 @@ public sealed class ListMemberCollection : ObservableCollection<ProfileViewModel
                         .Filter)
                         continue;
 
-                    Add(new ProfileViewModel(parent.Navigation, profile));
+                    Add(parent.CreateMember(profile, item.Uri));
                 }
             });
 

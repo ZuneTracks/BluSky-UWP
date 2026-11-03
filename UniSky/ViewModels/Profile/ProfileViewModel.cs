@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,6 +32,9 @@ public partial class ProfileViewModel : ViewModelBase, IRoutable
 
     protected ATIdentifier id;
     protected ATObject source;
+
+    public ATDid Did
+        => id as ATDid;
 
     public NavigationRoute Route
         => id == null ? null : NavigationRoute.Profile(id);

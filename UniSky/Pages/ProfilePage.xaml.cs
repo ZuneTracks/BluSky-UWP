@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using FishyFlip.Lexicon;
 using FishyFlip.Models;
@@ -337,4 +337,18 @@ public sealed partial class ProfilePage : Page, IScrollToTop
 
         scrollView.ChangeView(0, 0, null);
     }
-}
+
+    private async void AddToListButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel?.Did is not ATDid did)
+            return;
+
+        try
+        {
+            await new UniSky.Controls.Lists.AddToListsDialog(did, ViewModel.Name).ShowAsync();
+        }
+        catch (Exception)
+        {
+            // Another dialog is already open.
+        }
+    }}

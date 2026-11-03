@@ -4,12 +4,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:extensions="using:UniSky.Extensions"
     xmlns:lists="using:UniSky.ViewModels.Lists"
-    xmlns:profiles="using:UniSky.ViewModels.Profile"
+    xmlns:converters="using:UniSky.Converters"
     Loaded="Page_Loaded">
 
     <Page.Resources>
-        <DataTemplate x:Key="MemberTemplate" x:DataType="profiles:ProfileViewModel">
-            <Button Style="{ThemeResource CleanButtonStyle}" Command="{Binding OpenProfileCommand}">
+        <converters:VisibilityConverter x:Key="VisibilityConverter"/>
+
+        <DataTemplate x:Key="MemberTemplate" x:DataType="lists:ListMemberViewModel">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+            <Button Style="{ThemeResource CleanButtonStyle}" Command="{Binding OpenProfileCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
                 <Grid Margin="12,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -31,6 +38,33 @@
                     </StackPanel>
                 </Grid>
             </Button>
+                <Button Grid.Column="1"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center"
+                        Content="Remove"
+                        Command="{Binding RemoveCommand}"
+                        Visibility="{Binding CanRemove, Converter={StaticResource VisibilityConverter}}"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SuggestionTemplate" x:DataType="lists:ActorSuggestion">
+            <Grid Margin="0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Ellipse Width="32" Height="32" Margin="0,0,10,0">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="{x:Bind AvatarUrl}"/>
+                    </Ellipse.Fill>
+                </Ellipse>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind DisplayName}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{x:Bind Status}"
+                               Style="{ThemeResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"/>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
     </Page.Resources>
 
@@ -45,9 +79,15 @@
                 <RowDefinition x:Name="TitleBarPadding" Height="0"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
             <Border x:Name="HeaderBackground"
-                    Grid.RowSpan="3"
+                    Grid.RowSpan="4"
+                    Grid.ColumnSpan="2"
                     Background="{ThemeResource GenericPageHeaderBackgroundBrush}"
                     BorderBrush="{ThemeResource SystemControlRevealSeparatorBrush}"
                     extensions:Hairline.BorderThickness="1,0,1,1"/>
@@ -59,8 +99,45 @@
             <TextBlock Grid.Row="2"
                        Margin="24,0,24,12"
                        Text="{x:Bind ViewModel.Description, Mode=OneWay}"
+                       Grid.ColumnSpan="2"
                        Style="{ThemeResource BodyTextBlockStyle}"
                        TextWrapping="Wrap"/>
+            <StackPanel x:Name="OwnerActions"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="0,8,16,4"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Top"
+                        Visibility="{x:Bind ViewModel.IsOwner, Mode=OneWay, Converter={StaticResource VisibilityConverter}}">
+                <Button x:Name="EditListButton"
+                        Click="EditListButton_Click"
+                        ToolTipService.ToolTip="Edit list"
+                        AutomationProperties.Name="Edit list"
+                        Style="{ThemeResource ButtonRevealStyle}"
+                        Background="Transparent">
+                    <SymbolIcon Symbol="Edit"/>
+                </Button>
+                <Button x:Name="DeleteListButton"
+                        Click="DeleteListButton_Click"
+                        ToolTipService.ToolTip="Delete list"
+                        AutomationProperties.Name="Delete list"
+                        Style="{ThemeResource ButtonRevealStyle}"
+                        Background="Transparent"
+                        Margin="4,0,0,0">
+                    <SymbolIcon Symbol="Delete"/>
+                </Button>
+            </StackPanel>
+            <AutoSuggestBox x:Name="AddMemberBox"
+                            Grid.Row="3"
+                            Grid.ColumnSpan="2"
+                            Margin="24,0,24,12"
+                            PlaceholderText="Add people by name or handle"
+                            QueryIcon="AddFriend"
+                            ItemTemplate="{StaticResource SuggestionTemplate}"
+                            Visibility="{x:Bind ViewModel.IsOwner, Mode=OneWay, Converter={StaticResource VisibilityConverter}}"
+                            TextChanged="AddMemberBox_TextChanged"
+                            SuggestionChosen="AddMemberBox_SuggestionChosen"
+                            QuerySubmitted="AddMemberBox_QuerySubmitted"/>
         </Grid>
 
         <ListView x:Name="RootList"
