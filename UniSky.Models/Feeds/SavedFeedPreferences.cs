@@ -69,6 +69,13 @@ public static class SavedFeedPreferences
 
         update(items);
 
+        // app.bsky.actor.defs#savedFeed requires an id on every entry.
+        foreach (var item in items)
+        {
+            if (string.IsNullOrWhiteSpace(item.Id))
+                item.Id = NewTid();
+        }
+
         var savedFeeds = new SavedFeedsPrefV2 { Items = items };
         if (savedFeedsIndex >= 0)
             result[savedFeedsIndex] = savedFeeds;
@@ -76,6 +83,37 @@ public static class SavedFeedPreferences
             result.Add(savedFeeds);
 
         return result;
+    }
+
+    private const string TidAlphabet = "234567abcdefghijklmnopqrstuvwxyz";
+    private static readonly object tidLock = new();
+    private static readonly long tidClockId = new Random().Next(0, 1024);
+    private static long lastTidMicroseconds;
+
+    /// <summary>
+    /// Creates an AT Protocol TID: 53 bits of microseconds since the Unix epoch plus a 10-bit clock id,
+    /// encoded as 13 base32-sortable characters.
+    /// </summary>
+    internal static string NewTid()
+    {
+        long micros;
+        lock (tidLock)
+        {
+            micros = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).Ticks / 10;
+            if (micros <= lastTidMicroseconds)
+                micros = lastTidMicroseconds + 1;
+            lastTidMicroseconds = micros;
+        }
+
+        var value = (micros << 10) | tidClockId;
+        var chars = new char[13];
+        for (var i = 12; i >= 0; i--)
+        {
+            chars[i] = TidAlphabet[(int)(value & 31)];
+            value >>= 5;
+        }
+
+        return new string(chars);
     }
 
     private static bool IsFeed(SavedFeed item, ATUri uri)

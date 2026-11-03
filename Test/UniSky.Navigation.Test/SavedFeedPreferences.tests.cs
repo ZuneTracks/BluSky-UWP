@@ -30,10 +30,24 @@ public class SavedFeedPreferencesTests
         Assert.Equal("feed", addedFeed.TypeValue);
         Assert.Equal(FeedUri.ToString(), addedFeed.Value);
         Assert.True(addedFeed.Pinned);
+        Assert.Matches("^[2-7a-z]{13}$", addedFeed.Id);
 
         var updated = SavedFeedPreferences.WithPinnedFeed(added, FeedUri);
         var updatedPreference = Assert.IsType<SavedFeedsPrefV2>(Assert.Single(updated));
         Assert.Single(updatedPreference.Items);
+        Assert.Equal(addedFeed.Id, updatedPreference.Items[0].Id);
+    }
+
+    [Fact]
+    public void Saving_fills_in_missing_ids_on_existing_entries()
+    {
+        var legacy = new SavedFeed { TypeValue = "timeline", Value = "following", Pinned = true };
+        var updated = SavedFeedPreferences.WithPinnedFeed([new SavedFeedsPrefV2 { Items = [legacy] }], FeedUri);
+        var savedFeeds = Assert.IsType<SavedFeedsPrefV2>(Assert.Single(updated));
+
+        Assert.Equal(2, savedFeeds.Items.Count);
+        Assert.All(savedFeeds.Items, item => Assert.False(string.IsNullOrWhiteSpace(item.Id)));
+        Assert.NotEqual(savedFeeds.Items[0].Id, savedFeeds.Items[1].Id);
     }
 
     [Fact]
