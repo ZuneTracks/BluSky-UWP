@@ -1,10 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Uwp.UI.Extensions;
 using UniSky.Navigation;
 using UniSky.Services;
 using UniSky.Services.Navigation;
 using UniSky.ViewModels;
 using UniSky.ViewModels.Feeds;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -16,7 +20,14 @@ namespace UniSky.Pages;
 
 public sealed partial class FeedsPage : Page, IScrollToTop
 {
+    private static readonly TimeSpan AutoRefreshInterval = TimeSpan.FromMinutes(2);
+
+    private readonly DispatcherTimer autoRefreshTimer = new DispatcherTimer() { Interval = AutoRefreshInterval };
+    private readonly ITypedSettings settings = ServiceContainer.Default.GetRequiredService<ITypedSettings>();
     private NavigationRoute currentRoute;
+    private bool isActive;
+    private bool isCheckingForNewPosts;
+    private DateTimeOffset lastCheck = DateTimeOffset.MinValue;
 
     public FeedsViewModel ViewModel
     {
@@ -30,6 +41,7 @@ public sealed partial class FeedsPage : Page, IScrollToTop
     public FeedsPage()
     {
         this.InitializeComponent();
+        this.autoRefreshTimer.Tick += OnAutoRefreshTimerTick;
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -59,12 +71,92 @@ public sealed partial class FeedsPage : Page, IScrollToTop
 
         var safeAreaService = ServiceContainer.Scoped.GetRequiredService<ISafeAreaService>();
         safeAreaService.SafeAreaUpdated += OnSafeAreaUpdated;
+
+        isActive = true;
+        settings.SettingChanged += OnSettingChanged;
+        Window.Current.VisibilityChanged += OnWindowVisibilityChanged;
+        UpdateAutoRefreshTimer();
     }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
         base.OnNavigatedFrom(e);
         ServiceContainer.Scoped.GetRequiredService<ISafeAreaService>().SafeAreaUpdated -= OnSafeAreaUpdated;
+
+        isActive = false;
+        settings.SettingChanged -= OnSettingChanged;
+        Window.Current.VisibilityChanged -= OnWindowVisibilityChanged;
+        UpdateAutoRefreshTimer();
+    }
+
+    private void OnSettingChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ITypedSettings.AutoRefreshFeeds))
+            return;
+
+        _ = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, UpdateAutoRefreshTimer);
+    }
+
+    private void OnWindowVisibilityChanged(object sender, VisibilityChangedEventArgs e)
+    {
+        UpdateAutoRefreshTimer();
+
+        if (e.Visible && autoRefreshTimer.IsEnabled && DateTimeOffset.Now - lastCheck >= AutoRefreshInterval)
+            _ = CheckForNewPostsAsync();
+    }
+
+    private void UpdateAutoRefreshTimer()
+    {
+        var shouldRun = isActive && settings.AutoRefreshFeeds && Window.Current.Visible;
+        if (shouldRun && !autoRefreshTimer.IsEnabled)
+            autoRefreshTimer.Start();
+        else if (!shouldRun && autoRefreshTimer.IsEnabled)
+            autoRefreshTimer.Stop();
+    }
+
+    private async void OnAutoRefreshTimerTick(object sender, object e)
+    {
+        await CheckForNewPostsAsync();
+    }
+
+    private async Task CheckForNewPostsAsync()
+    {
+        if (isCheckingForNewPosts || FeedsPivot.SelectedItem is not FeedViewModel feed)
+            return;
+
+        isCheckingForNewPosts = true;
+        lastCheck = DateTimeOffset.Now;
+
+        try
+        {
+            if (!await feed.CheckForNewPostsAsync() || !isActive)
+                return;
+
+            // Only reload in place when the user is at the top, so we never move their reading position.
+            var scrollViewer = GetFeedScrollViewer(feed);
+            if (scrollViewer != null && scrollViewer.VerticalOffset < 1)
+                await feed.RefreshAsync();
+        }
+        finally
+        {
+            isCheckingForNewPosts = false;
+        }
+    }
+
+    private async void NewPostsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).DataContext is not FeedViewModel feed)
+            return;
+
+        await feed.RefreshAsync();
+        GetFeedScrollViewer(feed)?.ChangeView(0, 0, null, true);
+    }
+
+    private ScrollViewer GetFeedScrollViewer(FeedViewModel feed)
+    {
+        var container = FeedsPivot.ContainerFromItem(feed) as FrameworkElement;
+        var list = container?.FindDescendantByName("PART_FeedList") as ListView;
+        return list?.FindDescendant<ScrollViewer>();
     }
 
     private void OnSafeAreaUpdated(object sender, SafeAreaUpdatedEventArgs e)

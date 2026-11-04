@@ -81,6 +81,17 @@
                                                    Error="{Binding Error, Mode=OneWay}"
                                                    RetryCommand="{Binding RefreshCommand}"/>
 
+                        <Button x:Uid="FeedNewPostsButton"
+                                Content="New posts"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Margin="0,12,0,0"
+                                Padding="16,6"
+                                w1809:CornerRadius="16"
+                                Visibility="{x:Bind HasNewPosts, Mode=OneWay}"
+                                Click="NewPostsButton_Click"/>
+
                     </Grid>
                 </DataTemplate>
             </Pivot.ItemTemplate>

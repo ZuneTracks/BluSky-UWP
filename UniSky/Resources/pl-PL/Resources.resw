@@ -385,6 +385,9 @@
   <data name="SettingsAutoRefreshFeedsSwitch.Header" xml:space="preserve">
     <value>Automatycznie odświeża posty (eksperymentalne)</value>
   </data>
+  <data name="FeedNewPostsButton.Content" xml:space="preserve">
+    <value>Nowe posty</value>
+  </data>
   <data name="SettingsColorSchemeBox.Header" xml:space="preserve">
     <value>Schemat Kolorów</value>
   </data>

@@ -31,6 +31,7 @@ public class FeedItemCollection : ObservableCollection<PostViewModel>, ISupportI
     private readonly ATDid did;
     private readonly string filterType;
     private readonly HashSet<string> ids = [];
+    private readonly HashSet<string> seenKeys = [];
 
     private readonly IProtocolService protocolService = ServiceContainer.Scoped.GetRequiredService<IProtocolService>();
     private readonly IModerationService moderationService = ServiceContainer.Scoped.GetRequiredService<IModerationService>();
@@ -64,12 +65,98 @@ public class FeedItemCollection : ObservableCollection<PostViewModel>, ISupportI
         {
             this.cursor = null;
             this.ids.Clear();
-            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => this.Clear());
+            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                this.seenKeys.Clear();
+                this.Clear();
+            });
             await InternalLoadMoreItemsAsync(25);
         }
         finally
         {
             semaphore.Release();
+        }
+    }
+
+    /// <summary>
+    /// Checks the top of the feed for items that aren't loaded yet, without changing the list.
+    /// </summary>
+    public async Task<bool> HasNewItemsAsync()
+    {
+        if (!await semaphore.WaitAsync(0)) return false;
+
+        try
+        {
+            var (posts, _) = await FetchAsync(10, null).ConfigureAwait(false);
+            var hasNew = false;
+            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                if (this.seenKeys.Count == 0)
+                    return;
+
+                foreach (var item in posts)
+                {
+                    if (!this.seenKeys.Contains(GetKey(item)))
+                    {
+                        hasNew = true;
+                        break;
+                    }
+                }
+            });
+
+            return hasNew;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to check feed for new posts");
+            return false;
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    // Reposts of an already loaded post count as new items.
+    private static string GetKey(FeedViewPost item)
+        => item.Reason is ReasonRepost repost
+            ? $"{item.Post.Uri}|{repost.By?.Did}"
+            : item.Post.Uri?.ToString();
+
+    private async Task<(List<FeedViewPost> posts, string cursor)> FetchAsync(int count, string cursor)
+    {
+        var service = protocolService.Protocol;
+        switch (type)
+        {
+            case FeedType.Following:
+                {
+                    var list = (await service.GetTimelineAsync(limit: count, cursor: cursor)
+                        .ConfigureAwait(false))
+                        .HandleResult();
+
+                    // BUGBUG: seems FishyFlip doesn't do this for me?
+                    return (list.Feed, HttpUtility.UrlEncode(list.Cursor));
+                }
+            case FeedType.Custom:
+                {
+                    var list = (await service.GetFeedAsync(uri, limit: count, cursor: cursor)
+                        .ConfigureAwait(false))
+                        .HandleResult();
+
+                    // BUGBUG: ^^
+                    return (list.Feed, HttpUtility.UrlEncode(list.Cursor));
+                }
+            case FeedType.Author:
+                {
+                    var list = (await service.GetAuthorFeedAsync(did, filter: filterType, limit: count, cursor: cursor)
+                        .ConfigureAwait(false))
+                        .HandleResult();
+
+                    // BUGBUG: ^^
+                    return (list.Feed, HttpUtility.UrlEncode(list.Cursor));
+                }
+            default:
+                throw new InvalidOperationException();
         }
     }
 
@@ -91,7 +178,6 @@ public class FeedItemCollection : ObservableCollection<PostViewModel>, ISupportI
 
     private async Task<LoadMoreItemsResult> InternalLoadMoreItemsAsync(int count)
     {
-        var service = protocolService.Protocol;
         var viewModel = parent;
         viewModel.Error = null;
 
@@ -102,50 +188,15 @@ public class FeedItemCollection : ObservableCollection<PostViewModel>, ISupportI
         try
         {
             List<FeedViewPost> posts;
-            switch (type)
-            {
-                case FeedType.Following:
-                    {
-                        var list = (await service.GetTimelineAsync(limit: count, cursor: this.cursor)
-                            .ConfigureAwait(false))
-                            .HandleResult();
-
-                        // BUGBUG: seems FishyFlip doesn't do this for me?
-                        this.cursor = HttpUtility.UrlEncode(list.Cursor);
-                        posts = list.Feed;
-                        break;
-                    }
-                case FeedType.Custom:
-                    {
-                        var list = (await service.GetFeedAsync(uri, limit: count, cursor: this.cursor)
-                            .ConfigureAwait(false))
-                            .HandleResult();
-
-                        // BUGBUG: ^^
-                        this.cursor = HttpUtility.UrlEncode(list.Cursor);
-                        posts = list.Feed;
-                        break;
-                    }
-                case FeedType.Author:
-                    {
-                        var list = (await service.GetAuthorFeedAsync(did, filter: filterType, limit: count, cursor: this.cursor)
-                            .ConfigureAwait(false))
-                            .HandleResult();
-
-                        // BUGBUG: ^^
-                        this.cursor = HttpUtility.UrlEncode(list.Cursor);
-                        posts = list.Feed;
-                        break;
-                    }
-                default:
-                    throw new InvalidOperationException();
-            }
-
+            (posts, this.cursor) = await FetchAsync(count, this.cursor).ConfigureAwait(false);
 
             await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 foreach (var item in posts)
                 {
+                    // Track every fetched item, including filtered ones, so they never count as new.
+                    seenKeys.Add(GetKey(item));
+
                     var vm = new PostViewModel(this.parent.Navigation, item);
                     var ui = vm.Moderation.GetUI(ModerationContext.ContentList);
                     if (ui.Filter)

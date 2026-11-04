@@ -31,6 +31,8 @@ public partial class FeedViewModel : ViewModelBase
     private string name = null!;
     [ObservableProperty]
     private FeedItemCollection items = null!;
+    [ObservableProperty]
+    private bool hasNewPosts;
 
     protected FeedViewModel(INavigationContext navigation, FeedType type, IProtocolService protocolService)
         : base(navigation)
@@ -57,8 +59,21 @@ public partial class FeedViewModel : ViewModelBase
     public async Task RefreshAsync(Deferral? deferral = null)
     {
         this.Error = null!;
+        this.HasNewPosts = false;
         await this.Items.RefreshAsync();
         deferral?.Complete();
+    }
+
+    public async Task<bool> CheckForNewPostsAsync()
+    {
+        if (this.Error != null || this.IsLoading)
+            return false;
+
+        var hasNew = await this.Items.HasNewItemsAsync();
+        if (hasNew)
+            this.HasNewPosts = true;
+
+        return hasNew;
     }
 
     internal void OnFeedLoadError(Exception ex)
