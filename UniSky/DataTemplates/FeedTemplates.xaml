@@ -76,12 +76,21 @@
         <MenuFlyoutItem x:Uid="FeedMoreCopyTextItem" Text="Copy Text" Icon="Copy" Command="{Binding CopyTextCommand}"/>
         <MenuFlyoutItem x:Uid="FeedMoreCopyLinkItem" Text="Copy Link" Icon="Link" Command="{Binding CopyLinkCommand}"/>
         <MenuFlyoutSeparator/>
-        <MenuFlyoutItem x:Uid="FeedMoreMuteItem" Text="Mute Thread" Icon="Mute"/>
-        <MenuFlyoutItem x:Uid="FeedMoreHidePostItem" Text="Hide Post" Icon="Clear"/>
+        <MenuFlyoutItem x:Uid="FeedMoreMuteItem" Text="Mute Thread" Icon="Mute"
+                        Command="{Binding ToggleMuteThreadCommand}"
+                        Visibility="{Binding IsThreadMuted, Converter={StaticResource VisibilityConverter}, ConverterParameter=Invert}"/>
+        <MenuFlyoutItem Text="Unmute Thread" Icon="Volume"
+                        Command="{Binding ToggleMuteThreadCommand}"
+                        Visibility="{Binding IsThreadMuted, Converter={StaticResource VisibilityConverter}}"/>
+        <MenuFlyoutItem x:Uid="FeedMoreHidePostItem" Text="Hide Post" Icon="Clear"
+                        Command="{Binding HideCommand}"
+                        Visibility="{Binding IsMine, Converter={StaticResource VisibilityConverter}, ConverterParameter=Invert}"/>
         <MenuFlyoutSeparator/>
         <MenuFlyoutItem x:Uid="FeedMoreReportPostItem" Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}" 
                         Text="Report Post"
-                        Icon="ReportHacked"/>
+                        Icon="ReportHacked"
+                        Command="{Binding ReportCommand}"
+                        Visibility="{Binding IsMine, Converter={StaticResource VisibilityConverter}, ConverterParameter=Invert}"/>
         <MenuFlyoutItem Text="Delete Post"
                         Icon="Delete"
                         Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"
@@ -100,12 +109,21 @@
         <MenuFlyoutItem x:Uid="FeedMoreCopyTextItem" Text="Copy Text" Icon="Copy" Command="{Binding CopyTextCommand}"/>
         <MenuFlyoutItem x:Uid="FeedMoreCopyLinkItem" Text="Copy Link" Icon="Link" Command="{Binding CopyLinkCommand}"/>
         <MenuFlyoutSeparator/>
-        <MenuFlyoutItem x:Uid="FeedMoreMuteItem" Text="Mute Thread" Icon="Mute"/>
-        <MenuFlyoutItem x:Uid="FeedMoreHidePostItem" Text="Hide Post" Icon="Clear"/>
+        <MenuFlyoutItem x:Uid="FeedMoreMuteItem" Text="Mute Thread" Icon="Mute"
+                        Command="{Binding ToggleMuteThreadCommand}"
+                        Visibility="{Binding IsThreadMuted, Converter={StaticResource VisibilityConverter}, ConverterParameter=Invert}"/>
+        <MenuFlyoutItem Text="Unmute Thread" Icon="Volume"
+                        Command="{Binding ToggleMuteThreadCommand}"
+                        Visibility="{Binding IsThreadMuted, Converter={StaticResource VisibilityConverter}}"/>
+        <MenuFlyoutItem x:Uid="FeedMoreHidePostItem" Text="Hide Post" Icon="Clear"
+                        Command="{Binding HideCommand}"
+                        Visibility="{Binding IsMine, Converter={StaticResource VisibilityConverter}, ConverterParameter=Invert}"/>
         <MenuFlyoutSeparator/>
         <MenuFlyoutItem x:Uid="FeedMoreReportPostItem" Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"
                         Text="Report Post"
-                        Icon="ReportHacked"/>
+                        Icon="ReportHacked"
+                        Command="{Binding ReportCommand}"
+                        Visibility="{Binding IsMine, Converter={StaticResource VisibilityConverter}, ConverterParameter=Invert}"/>
         <MenuFlyoutItem Text="Delete Post"
                         Icon="Delete"
                         Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"

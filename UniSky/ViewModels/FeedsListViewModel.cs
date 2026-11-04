@@ -100,7 +100,7 @@ public partial class FeedsListViewModel : ViewModelBase
         await preferenceLock.WaitAsync();
         try
         {
-            var updatedPreferences = SavedFeedPreferences.WithPinnedFeed(preferences, feed.Uri);
+            var updatedPreferences = SavedFeedPreferences.WithPinnedFeed(await GetLatestPreferencesAsync(), feed.Uri);
             await PutPreferencesAsync(updatedPreferences);
 
             syncContext.Post(() =>
@@ -136,7 +136,7 @@ public partial class FeedsListViewModel : ViewModelBase
         try
         {
             var pinned = !feed.IsPinned;
-            var updatedPreferences = SavedFeedPreferences.WithFeedPinned(preferences, feed.Uri, pinned);
+            var updatedPreferences = SavedFeedPreferences.WithFeedPinned(await GetLatestPreferencesAsync(), feed.Uri, pinned);
             await PutPreferencesAsync(updatedPreferences);
 
             syncContext.Post(() => feed.IsPinned = pinned);
@@ -161,7 +161,7 @@ public partial class FeedsListViewModel : ViewModelBase
         await preferenceLock.WaitAsync();
         try
         {
-            var updatedPreferences = SavedFeedPreferences.WithoutFeed(preferences, feed.Uri);
+            var updatedPreferences = SavedFeedPreferences.WithoutFeed(await GetLatestPreferencesAsync(), feed.Uri);
             await PutPreferencesAsync(updatedPreferences);
 
             syncContext.Post(() =>
@@ -361,6 +361,17 @@ public partial class FeedsListViewModel : ViewModelBase
                     IsLoadingMore = false;
             });
         }
+    }
+
+    // Preferences can change elsewhere (hidden posts, other clients), so never save over a stale copy.
+    private async Task<List<ATObject>> GetLatestPreferencesAsync()
+    {
+        var result = (await protocolService.Protocol.GetPreferencesAsync()
+            .ConfigureAwait(false))
+            .HandleResult();
+
+        preferences = result.Preferences?.ToList() ?? [];
+        return preferences;
     }
 
     private async Task PutPreferencesAsync(List<ATObject> updatedPreferences)

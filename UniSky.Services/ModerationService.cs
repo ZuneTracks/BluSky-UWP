@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using FishyFlip;
+using FishyFlip.Lexicon.App.Bsky.Actor;
 using FishyFlip.Models;
 using Microsoft.Extensions.Logging;
 using UniSky.Helpers;
@@ -26,6 +28,8 @@ public class ModerationService(
 {
     private readonly ResourceLoader resources
         = ResourceLoader.GetForViewIndependentUse();
+
+    private static readonly SemaphoreSlim preferencesLock = new(1, 1);
 
     public ModerationOptions ModerationOptions { get; set; }
 
@@ -114,6 +118,47 @@ public class ModerationService(
         ModerationOptions = new ModerationOptions(protocol.Session.Did, moderationPrefs, labelDefs.Labelers, labelDefs.LabelDefs);
 
         _ = Task.Run(SaveCacheAsync);
+    }
+
+    public async Task HidePostAsync(ATUri uri)
+    {
+        await preferencesLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            var protocol = protocolService.Protocol;
+            var preferences = ((await protocol.GetPreferencesAsync().ConfigureAwait(false))
+                .HandleResult()?.Preferences ?? []).ToList();
+
+            var hidden = preferences.OfType<HiddenPostsPref>().FirstOrDefault();
+            if (hidden == null)
+            {
+                hidden = new HiddenPostsPref([]);
+                preferences.Add(hidden);
+            }
+
+            hidden.Items ??= [];
+            if (!hidden.Items.Any(item => item.ToString() == uri.ToString()))
+            {
+                hidden.Items.Add(uri);
+                (await protocol.PutPreferencesAsync(preferences).ConfigureAwait(false))
+                    .HandleResult();
+            }
+
+            if (ModerationOptions is { } options &&
+                !options.Prefs.HiddenPosts.Any(item => item.ToString() == uri.ToString()))
+            {
+                ModerationOptions = options with
+                {
+                    Prefs = options.Prefs with { HiddenPosts = [.. options.Prefs.HiddenPosts, uri] }
+                };
+
+                _ = Task.Run(SaveCacheAsync);
+            }
+        }
+        finally
+        {
+            preferencesLock.Release();
+        }
     }
 
     private async Task SaveCacheAsync()

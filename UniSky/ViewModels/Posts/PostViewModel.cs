@@ -19,6 +19,7 @@ using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using UniSky.Controls.Compose;
 using UniSky.Controls.Lists;
+using UniSky.Controls.Moderation;
 using UniSky.Helpers;
 using UniSky.Moderation;
 using UniSky.Navigation;
@@ -107,10 +108,20 @@ public partial class PostViewModel : ViewModelBase, IRoutable
     [NotifyPropertyChangedFor(nameof(PostVisibility))]
     private bool isDeleted;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PostVisibility))]
+    private bool isHidden;
+
+    [ObservableProperty]
+    private bool isThreadMuted;
+
     public bool IsMine { get; }
 
     public Visibility PostVisibility
-        => IsDeleted ? Visibility.Collapsed : Visibility.Visible;
+        => IsDeleted || IsHidden ? Visibility.Collapsed : Visibility.Visible;
+
+    private ATUri ThreadRoot
+        => Post.Reply?.Root?.Uri ?? Uri;
 
     public ATUri Uri { get; }
     
@@ -222,6 +233,7 @@ public partial class PostViewModel : ViewModelBase, IRoutable
 
             IsBookmarked = view.Viewer.Bookmarked == true;
             CanReply = view.Viewer.ReplyDisabled != true;
+            IsThreadMuted = view.Viewer.ThreadMuted == true;
         }
 
         foreach (var label in Author.Labels)
@@ -259,6 +271,67 @@ public partial class PostViewModel : ViewModelBase, IRoutable
         catch (Exception ex)
         {
             await ListDialogs.ShowErrorAsync("Couldn't delete post", ex);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleMuteThreadAsync()
+    {
+        var mute = !IsThreadMuted;
+        try
+        {
+            var protocol = ServiceContainer.Scoped.GetRequiredService<IProtocolService>().Protocol;
+            if (mute)
+                _ = (await protocol.Graph.MuteThreadAsync(ThreadRoot)).HandleResult();
+            else
+                _ = (await protocol.Graph.UnmuteThreadAsync(ThreadRoot)).HandleResult();
+
+            IsThreadMuted = mute;
+        }
+        catch (Exception ex)
+        {
+            await ListDialogs.ShowErrorAsync(mute ? "Couldn't mute thread" : "Couldn't unmute thread", ex);
+        }
+    }
+
+    [RelayCommand]
+    private async Task HideAsync()
+    {
+        if (IsMine || IsHidden)
+            return;
+
+        try
+        {
+            await moderationService.HidePostAsync(Uri);
+            IsHidden = true;
+        }
+        catch (Exception ex)
+        {
+            await ListDialogs.ShowErrorAsync("Couldn't hide post", ex);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ReportAsync()
+    {
+        if (IsMine)
+            return;
+
+        var report = await ReportPostDialog.ShowAsync();
+        if (report == null)
+            return;
+
+        try
+        {
+            var protocol = ServiceContainer.Scoped.GetRequiredService<IProtocolService>().Protocol;
+            _ = (await protocol.Moderation.CreateReportAsync(report.ReasonType, new StrongRef(View.Uri, View.Cid), report.Details))
+                .HandleResult();
+
+            await ReportPostDialog.ShowSubmittedAsync();
+        }
+        catch (Exception ex)
+        {
+            await ListDialogs.ShowErrorAsync("Couldn't send report", ex);
         }
     }
 

@@ -482,6 +482,7 @@
     <Compile Include="ViewModels\Lists\ListMemberCollection.cs" />
     <Compile Include="Controls\Lists\AddToListsDialog.cs" />
     <Compile Include="Controls\Lists\EditListDialog.cs" />
+    <Compile Include="Controls\Moderation\ReportPostDialog.cs" />
     <Compile Include="ViewModels\Lists\ListActions.cs" />
     <Compile Include="ViewModels\Lists\ListMemberViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListPageViewModel.cs" />
