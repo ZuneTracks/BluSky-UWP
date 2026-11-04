@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http.Headers;
 using System.ServiceModel;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using FishyFlip;
@@ -68,12 +69,134 @@ public class ProtocolService(ILogger<ProtocolService> logger) : IProtocolService
 
             _lastRefreshed = DateTimeOffset.Now;
 
-            await DoRefreshAsync(logger, sessionModel)
+            await DoRefreshAsync(logger, GetLatestSession(sessionModel))
                 .ConfigureAwait(false);
         }
         finally
         {
             refreshTokenSemaphore.Release();
+        }
+    }
+
+    public async Task EnsureSessionAsync(SessionModel sessionModel)
+    {
+        await refreshTokenSemaphore.WaitAsync();
+
+        try
+        {
+            var latest = GetLatestSession(sessionModel);
+            if (!IsAccessTokenValid(latest.AccessJwt, TimeSpan.FromMinutes(5)))
+            {
+                await DoRefreshAsync(logger, latest)
+                    .ConfigureAwait(false);
+                return;
+            }
+
+            // refresh tokens are single use, rotating them here would invalidate the copy held by the app
+            var protocol = new ATProtocolBuilder(Protocol.Options)
+                .Build();
+
+            var session = await protocol.AuthenticateWithPasswordSessionResultAsync(latest.Session)
+                .ConfigureAwait(false);
+            if (session == null)
+                throw new InvalidOperationException("Authentication failed!");
+
+            SetProtocol(protocol);
+        }
+        finally
+        {
+            refreshTokenSemaphore.Release();
+        }
+    }
+
+    public async Task SyncSessionAsync()
+    {
+        if (_protocol?.SessionManager is not PasswordSessionManager manager || manager.Session == null)
+            return;
+
+        await refreshTokenSemaphore.WaitAsync();
+
+        try
+        {
+            var current = manager.Session;
+            var sessionService = ServiceContainer.Scoped.GetRequiredService<ISessionService>();
+            if (sessionService.TryFindSession(current.Did.Handler, out var stored)
+                && !string.IsNullOrEmpty(stored.RefreshJwt)
+                && stored.RefreshJwt != current.RefreshJwt)
+            {
+                logger.LogInformation("Session tokens were updated elsewhere, using stored tokens.");
+                current = stored.Session.Session;
+                manager.SetSession(current);
+            }
+
+            if (IsAccessTokenValid(current.AccessJwt, TimeSpan.FromMinutes(10)))
+                return;
+
+            // renew on a temporary protocol, FishyFlip swaps the shared client's bearer to the refresh token while refreshing
+            var temporaryProtocol = new ATProtocolBuilder(_protocol.Options)
+                .Build();
+
+            await temporaryProtocol.AuthenticateWithPasswordSessionResultAsync(new AuthSession(
+                new Session(current.Did,
+                            current.DidDoc,
+                            current.Handle,
+                            current.Email,
+                            current.RefreshJwt,
+                            current.RefreshJwt,
+                            current.ExpiresIn)))
+                .ConfigureAwait(false);
+
+            var refreshed = (await temporaryProtocol.RefreshSessionAsync()
+                .ConfigureAwait(false))
+                .HandleResult();
+
+            manager.SetSession(new Session(refreshed.Did,
+                                           refreshed.DidDoc ?? current.DidDoc,
+                                           refreshed.Handle,
+                                           current.Email,
+                                           refreshed.AccessJwt,
+                                           refreshed.RefreshJwt,
+                                           DateTime.Now + TimeSpan.FromHours(2)));
+
+            _lastRefreshed = DateTimeOffset.Now;
+            logger.LogInformation("Successfully renewed session.");
+        }
+        finally
+        {
+            refreshTokenSemaphore.Release();
+        }
+    }
+
+    private static SessionModel GetLatestSession(SessionModel sessionModel)
+    {
+        // the background task and the app run in separate processes, so always use the newest saved tokens
+        var sessionService = ServiceContainer.Scoped.GetService<ISessionService>();
+        if (sessionService != null && sessionService.TryFindSession(sessionModel.DID, out var latest))
+            return latest;
+
+        return sessionModel;
+    }
+
+    internal static bool IsAccessTokenValid(string jwt, TimeSpan margin)
+    {
+        try
+        {
+            var parts = jwt?.Split('.');
+            if (parts == null || parts.Length < 2)
+                return false;
+
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            payload = payload.PadRight(payload.Length + ((4 - (payload.Length % 4)) % 4), '=');
+
+            using var document = JsonDocument.Parse(Convert.FromBase64String(payload));
+            if (!document.RootElement.TryGetProperty("exp", out var exp) || !exp.TryGetInt64(out var seconds))
+                return false;
+
+            return DateTimeOffset.FromUnixTimeSeconds(seconds) - margin > DateTimeOffset.UtcNow;
+        }
+        catch
+        {
+            return false;
         }
     }
 

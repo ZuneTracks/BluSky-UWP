@@ -59,7 +59,7 @@ public sealed class BadgeBackgroundTask : IBackgroundTask
                         .WithUserAgent(Constants.UserAgent)
                         .Build());
 
-                    await protocolService.RefreshSessionAsync(session);
+                    await protocolService.EnsureSessionAsync(session);
                 }
                 catch (Exception ex)
                 {

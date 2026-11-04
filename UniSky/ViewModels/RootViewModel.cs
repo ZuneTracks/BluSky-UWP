@@ -41,8 +41,9 @@ public partial class RootViewModel : ViewModelBase, IRootNavigator
         this.sessionService = sessionService;
         this.navigationService = navigationServiceLocator.GetNavigationService("Root");
 
-        this.refreshTokenTimer = new DispatcherTimer() { Interval = TimeSpan.FromHours(1) };
+        this.refreshTokenTimer = new DispatcherTimer() { Interval = TimeSpan.FromMinutes(5) };
         this.refreshTokenTimer.Tick += OnRefreshTokenTimerTick;
+        Application.Current.Resuming += OnRefreshTokenTimerTick;
 
         if (!settingsService.TryRead<string>("LastUsedUser", out var session))
         {
@@ -84,7 +85,11 @@ public partial class RootViewModel : ViewModelBase, IRootNavigator
 
             await protocolService.RefreshSessionAsync(session);
 
-            syncContext.Post(() => navigationService.Navigate<HomePage>(CreateHomeViewModel()));
+            syncContext.Post(() =>
+            {
+                navigationService.Navigate<HomePage>(CreateHomeViewModel());
+                refreshTokenTimer.Start();
+            });
         }
         catch (Exception ex)
         {
@@ -102,24 +107,15 @@ public partial class RootViewModel : ViewModelBase, IRootNavigator
 
     private async void OnRefreshTokenTimerTick(object sender, object e)
     {
-        if (protocolService.Protocol == null)
-            return;
-
         try
         {
-            if (!settingsService.TryRead<string>("LastUsedUser", out var did))
-                return;
-
-            if (!sessionService.TryFindSession(did, out var session))
-                return;
-
-            await protocolService.RefreshSessionAsync(session)
+            await protocolService.SyncSessionAsync()
                                  .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to authenticate!");
-            await GoToLoginAsync();
+            // a failed renewal is retried on the next tick, FishyFlip also renews on expired token errors
+            logger.LogError(ex, "Failed to renew session!");
         }
     }
 
