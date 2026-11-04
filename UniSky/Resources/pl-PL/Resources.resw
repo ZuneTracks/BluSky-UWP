@@ -257,6 +257,9 @@
   <data name="Notification_Other" xml:space="preserve">
     <value>inny</value>
   </data>
+  <data name="Notification_ToastOverflow" xml:space="preserve">
+    <value>Więcej powiadomień: {0}</value>
+  </data>
   <data name="Notification_Quote" xml:space="preserve">
     <value>{0} zacytował twój post</value>
     <comment>{0} = nazwa wyświetlająca użytkownika</comment>

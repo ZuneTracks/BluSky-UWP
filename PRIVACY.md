@@ -22,9 +22,9 @@ The app stores settings, including theme choices, notification preferences, lang
 
 Diagnostic logs record technical events and errors. They remain on your device unless you choose to retrieve or share them with support.
 
-### Push notifications
+### Notifications
 
-Push notifications are not currently available. BluSky UWP does not register a Windows push channel or send any information to a notification-registration service.
+BluSky UWP does not use a push-notification server. When notifications are turned on in Settings, a Windows background task checks your Bluesky notifications directly with your PDS about every 15 minutes and shows any new ones as Windows notifications on your device. It stores the time of the newest notification it has checked for each signed-in account in app-local storage. You can turn this off in Settings.
 
 Versions before 1.5.2 sent your Bluesky DID, the app installation identifier, the Windows push-channel URI, your notification preferences and your language preferences to `https://wamwoowam.co.uk/unisky/push/register`, an endpoint inherited from the original UniSky project and not operated by BluSky UWP.
 
@@ -44,7 +44,7 @@ The app does not include advertising or analytics SDKs and does not sell persona
 Information is shared only as necessary to provide the app's features:
 
 - **AT Protocol and Bluesky services:** Your selected PDS and other AT Protocol services receive the requests required to use Bluesky.
-- **Previous notification-registration service:** Versions before 1.5.2 sent the registration data described in the Push notifications section to the endpoint identified there.
+- **Previous notification-registration service:** Versions before 1.5.2 sent the registration data described in the Notifications section to the endpoint identified there.
 
 Those services have their own privacy practices. BluSky UWP does not control information handled by them after it is received.
 

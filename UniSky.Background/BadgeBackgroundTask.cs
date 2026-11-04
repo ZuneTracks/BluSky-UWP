@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FishyFlip;
 using FishyFlip.Lexicon.App.Bsky.Notification;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,9 +39,18 @@ public sealed class BadgeBackgroundTask : IBackgroundTask
             var sessionService = ServiceContainer.Default.GetRequiredService<ISessionService>();
             var protocolService = ServiceContainer.Default.GetRequiredService<IProtocolService>();
             var atLogger = ServiceContainer.Default.GetRequiredService<ILogger<ATProtocol>>();
+            var settings = ServiceContainer.Default.GetRequiredService<ISettingsService>();
+            var options = ServiceContainer.Default.GetRequiredService<ITypedSettings>().NotificationOptions;
+            var notificationsEnabled = NotificationToaster.IsEnabled(options);
 
-            foreach (var session in sessionService.EnumerateAllSessions())
+            var sessions = sessionService.EnumerateAllSessions().ToList();
+            var toaster = new NotificationToaster(settings, logger, options, showAccount: sessions.Count > 1);
+
+            foreach (var session in sessions)
             {
+                if (!notificationsEnabled)
+                    NotificationToaster.Reset(settings, session.DID);
+
                 try
                 {
                     protocolService.SetProtocol(new ATProtocolBuilder()
@@ -64,11 +74,15 @@ public sealed class BadgeBackgroundTask : IBackgroundTask
                         .ConfigureAwait(false))
                         .HandleResult();
 
-                    badgeCount += (int)notifications.Count;
+                    var unread = (int)Math.Min(notifications.Count, int.MaxValue);
+                    badgeCount += unread;
+
+                    if (notificationsEnabled)
+                        await toaster.ShowNewAsync(protocol, session, unread).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to fetch badge count for {Did}", session.DID);
+                    logger.LogError(ex, "Failed to fetch notifications for {Did}", session.DID);
                     continue;
                 }
             }

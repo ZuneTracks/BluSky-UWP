@@ -257,6 +257,9 @@
   <data name="Notification_Other" xml:space="preserve">
     <value>other</value>
   </data>
+  <data name="Notification_ToastOverflow" xml:space="preserve">
+    <value>{0} more notifications</value>
+  </data>
   <data name="NotificationsPageNoItemsTitle.Text" xml:space="preserve">
     <value>Nothing here yet!</value>
   </data>

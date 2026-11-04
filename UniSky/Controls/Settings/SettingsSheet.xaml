@@ -45,10 +45,9 @@
                 <ComboBoxItem x:Uid="SettingsAppThemeItem_Nighttime" Content="Nighttime"  />
             </ComboBox>
             
-            <!-- Hidden until BluSky has its own push notification backend. -->
+            <!-- Toasts come from the 15-minute background task rather than WNS push. -->
             <ToggleSwitch x:Uid="EnableNotifications"
-                          Header="Enable push notifications (experimental)" 
-                          Visibility="Collapsed"
+                          Header="Show notifications (checked every 15 minutes)" 
                           HorizontalAlignment="Stretch" 
                           Margin="0,0,0,4" 
                           IsOn="{Binding NotificationsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

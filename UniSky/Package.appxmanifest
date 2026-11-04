@@ -63,6 +63,7 @@
         <Extension Category="windows.backgroundTasks" EntryPoint="UniSky.Background.BadgeBackgroundTask">
           <BackgroundTasks>
             <Task Type="systemEvent"/>
+            <Task Type="timer"/>
             <Task Type="general"/>
           </BackgroundTasks>
         </Extension>
