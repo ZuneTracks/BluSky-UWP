@@ -18,6 +18,7 @@ using FishyFlip.Models;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using UniSky.Controls.Compose;
+using UniSky.Controls.Lists;
 using UniSky.Helpers;
 using UniSky.Moderation;
 using UniSky.Navigation;
@@ -101,6 +102,15 @@ public partial class PostViewModel : ViewModelBase, IRoutable
 
     [ObservableProperty]
     private ContentWarningViewModel warning;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PostVisibility))]
+    private bool isDeleted;
+
+    public bool IsMine { get; }
+
+    public Visibility PostVisibility
+        => IsDeleted ? Visibility.Collapsed : Visibility.Visible;
 
     public ATUri Uri { get; }
     
@@ -216,6 +226,40 @@ public partial class PostViewModel : ViewModelBase, IRoutable
 
         foreach (var label in Author.Labels)
             Labels.Add(label);
+
+        try
+        {
+            var currentDid = ServiceContainer.Default.GetRequiredService<IProtocolService>()
+                .Protocol.Session?.Did?.ToString();
+            IsMine = currentDid != null && currentDid == view.Author.Did?.ToString();
+        }
+        catch
+        {
+            IsMine = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteAsync()
+    {
+        if (!IsMine || IsDeleted)
+            return;
+
+        if (!await ListDialogs.ConfirmAsync("Delete post?",
+            "This post will be permanently deleted. This can't be undone.",
+            "Delete"))
+            return;
+
+        try
+        {
+            var protocol = ServiceContainer.Scoped.GetRequiredService<IProtocolService>().Protocol;
+            _ = (await protocol.Feed.DeletePostAsync(Uri.Rkey)).HandleResult();
+            IsDeleted = true;
+        }
+        catch (Exception ex)
+        {
+            await ListDialogs.ShowErrorAsync("Couldn't delete post", ex);
+        }
     }
 
     [RelayCommand]

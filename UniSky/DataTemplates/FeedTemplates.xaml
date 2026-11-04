@@ -82,6 +82,11 @@
         <MenuFlyoutItem x:Uid="FeedMoreReportPostItem" Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}" 
                         Text="Report Post"
                         Icon="ReportHacked"/>
+        <MenuFlyoutItem Text="Delete Post"
+                        Icon="Delete"
+                        Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"
+                        Command="{Binding DeleteCommand}"
+                        Visibility="{Binding IsMine, Converter={StaticResource VisibilityConverter}}"/>
     </MenuFlyout>
     
     <MenuFlyout x:Key="FeedItemMoreFlyout"
@@ -101,6 +106,11 @@
         <MenuFlyoutItem x:Uid="FeedMoreReportPostItem" Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"
                         Text="Report Post"
                         Icon="ReportHacked"/>
+        <MenuFlyoutItem Text="Delete Post"
+                        Icon="Delete"
+                        Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"
+                        Command="{Binding DeleteCommand}"
+                        Visibility="{Binding IsMine, Converter={StaticResource VisibilityConverter}}"/>
     </MenuFlyout>
 
     <Style x:Key="FeedItemActionButtonStyle"
@@ -611,6 +621,7 @@
     <DataTemplate x:Key="FeedItemContentTemplate"
                   x:DataType="posts:PostViewModel">
         <Button Style="{ThemeResource CleanButtonStyle}"
+                Visibility="{x:Bind PostVisibility, Mode=OneWay}"
                 Command="{x:Bind OpenThreadCommand}"
                 CommandParameter="{Binding ElementName=PrimaryContent}"
                 ContextFlyout="{StaticResource FeedItemMoreButtonFlyout}"

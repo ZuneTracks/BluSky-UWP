@@ -26,6 +26,7 @@
     <DataTemplate x:Key="ThreadItemHighlightedContentTemplate"
                   x:DataType="thread:ThreadPostViewModel">
         <StackPanel BorderBrush="{ThemeResource SystemControlRevealSeparatorBrush}"
+                    Visibility="{x:Bind PostVisibility, Mode=OneWay}"
                     extensions:Hairline.BorderThickness="{Binding Borders, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
                     Padding="12,8,12,4">
