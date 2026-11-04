@@ -64,7 +64,12 @@ public partial class HomeViewModel : ViewModelBase
     private bool isLoaded;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HairlineMarginsOpacity))]
     private MenuItemViewModel _selectedMenuItem;
+
+    // chats lays out wider than the 600px feed column and draws its own borders
+    public double HairlineMarginsOpacity
+        => SelectedMenuItem?.Page == HomePages.Chat ? 0 : 1;
 
     public ObservableCollection<MenuItemViewModel> MenuItems { get; } = [];
     public ObservableCollection<MenuItemViewModel> FooterMenuItems { get; } = [];

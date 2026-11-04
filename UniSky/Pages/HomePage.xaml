@@ -142,6 +142,7 @@
                 <Grid x:Name="FrameContainerContainer">
                     <Border x:Name="HairlineMargins"
                         MaxWidth="600" 
+                        Opacity="{x:Bind ViewModel.HairlineMarginsOpacity, Mode=OneWay}"
                         BorderBrush="{ThemeResource SystemControlRevealSeparatorBrush}"
                         extensions:Hairline.BorderThickness="1,0"/>
 
