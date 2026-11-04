@@ -51,6 +51,10 @@ public sealed partial class FeedsPage : Page, IScrollToTop
             {
                 this.ViewModel = ActivatorUtilities.CreateInstance<FeedsViewModel>(ServiceContainer.Scoped, scope);
             }
+
+            // The frame reuses one cached instance of this page for Home and every feed route, and
+            // x:Bind defaults to OneTime, so rebind or the pivot keeps showing the previous feed.
+            this.Bindings.Update();
         }
 
         var safeAreaService = ServiceContainer.Scoped.GetRequiredService<ISafeAreaService>();

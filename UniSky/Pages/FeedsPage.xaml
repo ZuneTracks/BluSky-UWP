@@ -15,6 +15,7 @@
     xmlns:controls="using:UniSky.Controls"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=viewmodels:FeedsViewModel}"
+    NavigationCacheMode="Enabled"
     w1803:KeyboardAcceleratorPlacementMode="Hidden">
     <Page.Resources>
         <templates:FeedTemplates/>
