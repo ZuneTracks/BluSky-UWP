@@ -237,7 +237,7 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
 
             var sent = await chatService.SendTextMessageAsync(conversation.Id, text).ConfigureAwait(false);
             await DiagnosticLog.WriteAsync($"Message sent to conversation {conversation.Id}; updating the UI.");
-            var message = new ChatMessageViewModel(sent, currentUserDid);
+            var message = new ChatMessageViewModel(sent, currentUserDid, conversation);
             await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 if (SelectedConversation?.Id != conversation.Id)
@@ -379,7 +379,7 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
 
                 var pageItems = page.Messages
                     .Where(message => !string.IsNullOrWhiteSpace(message.Id) && messageIds.Add(message.Id))
-                    .Select(message => new ChatMessageViewModel(message, CurrentUserDid))
+                    .Select(message => new ChatMessageViewModel(message, CurrentUserDid, conversation))
                     .OrderBy(message => message.SentAt)
                     .ToList();
 
