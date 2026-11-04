@@ -24,15 +24,9 @@ Diagnostic logs record technical events and errors. They remain on your device u
 
 ### Push notifications
 
-Push notifications are optional. If you enable them while signed in, BluSky UWP registers a Windows push channel and sends the following information to its current notification-registration endpoint:
+Push notifications are not currently available. BluSky UWP does not register a Windows push channel or send any information to a notification-registration service.
 
-- Your Bluesky DID
-- The app installation identifier
-- The Windows push-channel URI
-- Your notification preferences
-- Your language preferences
-
-The current endpoint is `https://wamwoowam.co.uk/unisky/push/register`. Do not enable push notifications if you do not want this information sent to that service.
+Versions before 1.5.2 sent your Bluesky DID, the app installation identifier, the Windows push-channel URI, your notification preferences and your language preferences to `https://wamwoowam.co.uk/unisky/push/register`, an endpoint inherited from the original UniSky project and not operated by BluSky UWP.
 
 ## How information is used
 
@@ -41,7 +35,6 @@ BluSky UWP uses this information to:
 - Authenticate and maintain your Bluesky session.
 - Display and interact with Bluesky content and account features you request.
 - Remember your app settings.
-- Deliver optional push notifications.
 - Diagnose app failures when you choose to provide diagnostic information to support.
 
 The app does not include advertising or analytics SDKs and does not sell personal information.
@@ -51,8 +44,7 @@ The app does not include advertising or analytics SDKs and does not sell persona
 Information is shared only as necessary to provide the app's features:
 
 - **AT Protocol and Bluesky services:** Your selected PDS and other AT Protocol services receive the requests required to use Bluesky.
-- **Microsoft:** Windows provides the operating-system push-notification service when notifications are enabled.
-- **Notification-registration service:** The endpoint identified above receives the registration data described in the Push notifications section.
+- **Previous notification-registration service:** Versions before 1.5.2 sent the registration data described in the Push notifications section to the endpoint identified there.
 
 Those services have their own privacy practices. BluSky UWP does not control information handled by them after it is received.
 
@@ -60,7 +52,7 @@ Those services have their own privacy practices. BluSky UWP does not control inf
 
 Session information, settings, caches, and diagnostic logs are stored locally on your device until they are removed by signing out where available, clearing the app's data, or uninstalling the app. Temporary media files are used while processing uploads.
 
-You can disable push notifications in the app's Settings. You can also remove the app and its local data through Windows to remove data stored by the app on your device. Removing local app data does not remove information held by Bluesky, your PDS, Microsoft, or the notification-registration service; contact the applicable service for requests concerning data it holds.
+You can remove the app and its local data through Windows to remove data stored by the app on your device. Removing local app data does not remove information held by Bluesky, your PDS, or the previous notification-registration service; contact the applicable service for requests concerning data it holds.
 
 ## Security
 

@@ -45,8 +45,10 @@
                 <ComboBoxItem x:Uid="SettingsAppThemeItem_Nighttime" Content="Nighttime"  />
             </ComboBox>
             
+            <!-- Hidden until BluSky has its own push notification backend. -->
             <ToggleSwitch x:Uid="EnableNotifications"
                           Header="Enable push notifications (experimental)" 
+                          Visibility="Collapsed"
                           HorizontalAlignment="Stretch" 
                           Margin="0,0,0,4" 
                           IsOn="{Binding NotificationsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

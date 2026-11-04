@@ -133,7 +133,7 @@
     <value>Tweetuj ponownie</value>
   </data>
   <data name="AppTitle.Text" xml:space="preserve">
-    <value>Twitter</value>
+    <value>BluSky UWP</value>
   </data>
   <data name="E_ReplyToNonPost" xml:space="preserve">
     <value>Próbowanie odpowiedzieć do czegoś co nie jest postem?</value>

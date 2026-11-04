@@ -133,7 +133,7 @@
     <value>Retweet</value>
   </data>
   <data name="AppTitle.Text" xml:space="preserve">
-    <value>Twitter</value>
+    <value>BluSky UWP</value>
   </data>
   <data name="E_ReplyToNonPost" xml:space="preserve">
     <value>Trying to reply to something that isn't a tweet?</value>
