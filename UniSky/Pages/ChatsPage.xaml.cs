@@ -18,7 +18,8 @@ namespace UniSky.Pages;
 
 public sealed partial class ChatsPage : Page, IScrollToTop
 {
-    private const double WideLayoutMinimumWidth = 1200;
+    // measured against the page rather than the window so the navigation pane doesn't skew it
+    private const double WideLayoutMinimumWidth = 720;
 
     public ChatsPageViewModel ViewModel
     {
@@ -148,7 +149,10 @@ public sealed partial class ChatsPage : Page, IScrollToTop
         if (InboxPane is null)
             return;
 
-        var showConversationOnly = ActualWidth < WideLayoutMinimumWidth &&
+        var isWide = ActualWidth >= WideLayoutMinimumWidth;
+        VisualStateManager.GoToState(this, isWide ? "Wide" : "Small", false);
+
+        var showConversationOnly = !isWide &&
             ViewModel?.HasSelectedConversation == true;
         InboxPane.Visibility = showConversationOnly ? Visibility.Collapsed : Visibility.Visible;
     }
