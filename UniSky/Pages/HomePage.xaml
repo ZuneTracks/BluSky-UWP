@@ -112,13 +112,13 @@
                         <TranslateTransform x:Name="PaneHeaderTransform" />
                     </Grid.RenderTransform>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="32"/>
+                        <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Viewbox VerticalAlignment="Center"
                              HorizontalAlignment="Center"
-                             Margin="8,2,0,0"
+                             Margin="16,2,0,0"
                              Width="16"
                              Height="16">
                         <Image Source="ms-appx:///Assets/Square44x44Logo.targetsize-24_altform-unplated.png"
