@@ -118,7 +118,7 @@
 
                     <Viewbox VerticalAlignment="Center"
                              HorizontalAlignment="Center"
-                             Margin="16,2,0,0"
+                             Margin="16,0,0,0"
                              Width="16"
                              Height="16">
                         <Image Source="ms-appx:///Assets/Square44x44Logo.targetsize-24_altform-unplated.png"
@@ -129,7 +129,7 @@
                                Style="{ThemeResource CaptionTextBlockStyle}" 
                                VerticalAlignment="Center" 
                                Grid.Column="1"
-                               Margin="8,0"/>
+                               Margin="8,0,8,2"/>
                 </Grid>
             </mux:NavigationView.PaneHeader>
 
