@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Threading.Tasks;
 using FishyFlip.Lexicon;
 using FishyFlip.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ using EF = Microsoft.Toolkit.Uwp.UI.Animations.Expressions.ExpressionFunctions;
 
 namespace UniSky.Pages;
 
-public sealed partial class ProfilePage : Page, IScrollToTop
+public sealed partial class ProfilePage : Page, IScrollToTop, IRefreshOnShow
 {
     private const string PROGRESS_NODE = "progress";
     private const string PIXELS_TO_MOVE_NODE = "pixelsToMove";
@@ -351,4 +352,15 @@ public sealed partial class ProfilePage : Page, IScrollToTop
         {
             // Another dialog is already open.
         }
-    }}
+    }
+
+    public async Task RefreshOnShowAsync()
+    {
+        try
+        {
+            if (ViewModel != null)
+                await ViewModel.RefreshAsync();
+        }
+        catch { }
+    }
+}

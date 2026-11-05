@@ -96,6 +96,18 @@ public partial class ProfilePageViewModel : ProfileViewModel
         Task.Run(LoadAsync);
     }
 
+    public async Task RefreshAsync()
+    {
+        if (IsLoading)
+            return;
+
+        Error = null!;
+        var feed = SelectedFeed;
+        await Task.WhenAll(
+            Task.Run(LoadAsync),
+            feed?.RefreshAsync() ?? Task.CompletedTask);
+    }
+
     private async Task LoadAsync()
     {
         using var context = this.GetLoadingContext();

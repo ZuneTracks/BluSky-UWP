@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Uwp.UI.Extensions;
 using UniSky.Navigation;
 using UniSky.Services;
@@ -15,7 +16,7 @@ using MUXC = Microsoft.UI.Xaml.Controls;
 
 namespace UniSky.Pages;
 
-public sealed partial class NotificationsPage : Page, IScrollToTop
+public sealed partial class NotificationsPage : Page, IScrollToTop, IRefreshOnShow
 {
     public NotificationsPageViewModel ViewModel
     {
@@ -105,5 +106,15 @@ public sealed partial class NotificationsPage : Page, IScrollToTop
     {
         args.Handled = true;
         await ViewModel.RefreshAsync();
+    }
+
+    public async Task RefreshOnShowAsync()
+    {
+        try
+        {
+            if (ViewModel != null)
+                await ViewModel.RefreshAsync();
+        }
+        catch { }
     }
 }

@@ -47,6 +47,22 @@ public partial class MenuItemViewModel : ViewModelBase
             NavigationScopeHost.EnsureScope(frame);
 
             frame.SourcePageType = FrameType;
+
+            // Tabs keep their frame alive, so the page never re-navigates when the tab is reselected.
+            // The frame is re-added to the tree each time the tab is shown, so refresh then.
+            var hasBeenShown = false;
+            frame.Loaded += (_, _) =>
+            {
+                if (!hasBeenShown)
+                {
+                    hasBeenShown = true;
+                    return;
+                }
+
+                if (frame.Content is IRefreshOnShow page)
+                    _ = page.RefreshOnShowAsync();
+            };
+
             return _contentCache = frame;
         }
     }

@@ -16,7 +16,7 @@ using MUXC = Microsoft.UI.Xaml.Controls;
 
 namespace UniSky.Pages;
 
-public sealed partial class ChatsPage : Page, IScrollToTop
+public sealed partial class ChatsPage : Page, IScrollToTop, IRefreshOnShow
 {
     // measured against the page rather than the window so the navigation pane doesn't skew it
     private const double WideLayoutMinimumWidth = 720;
@@ -170,5 +170,15 @@ public sealed partial class ChatsPage : Page, IScrollToTop
             await DiagnosticLog.WriteExceptionAsync("Chats page initial load failed", exception);
             ViewModel.ReportFailure(exception);
         }
+    }
+
+    public async Task RefreshOnShowAsync()
+    {
+        try
+        {
+            if (ViewModel != null)
+                await ViewModel.RefreshAsync();
+        }
+        catch { }
     }
 }

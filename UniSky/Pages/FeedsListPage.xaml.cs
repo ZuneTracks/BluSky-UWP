@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using UniSky.Services;
 using UniSky.Navigation;
@@ -10,7 +11,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace UniSky.Pages;
 
-public sealed partial class FeedsListPage : Page
+public sealed partial class FeedsListPage : Page, IRefreshOnShow
 {
     public FeedsListViewModel ViewModel
     {
@@ -63,5 +64,15 @@ public sealed partial class FeedsListPage : Page
             TitleBarPadding.Height = new GridLength(0);
         else
             TitleBarPadding.Height = new GridLength(e.SafeArea.Bounds.Top);
+    }
+
+    public async Task RefreshOnShowAsync()
+    {
+        try
+        {
+            if (ViewModel != null)
+                await ViewModel.RefreshAsync();
+        }
+        catch { }
     }
 }
