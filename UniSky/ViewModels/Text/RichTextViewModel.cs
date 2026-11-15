@@ -98,6 +98,11 @@ public class RichTextViewModel
                 .Where(f => f is not null)
                 .ToArray();
 
+            // Match bsky.app: shorten links whose visible text is the raw URL.
+            var link = facetTypes.OfType<LinkProperty>().FirstOrDefault();
+            if (link != null && string.Equals(str.Trim(), link.Url, StringComparison.OrdinalIgnoreCase))
+                str = ToShortUrl(link.Url);
+
             facetInlines.Add(new FacetInline(str, facetTypes));
 
             idx = end;
@@ -109,6 +114,17 @@ public class RichTextViewModel
         }
 
         return facetInlines;
+    }
+
+    private static string ToShortUrl(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            return url;
+
+        var path = (uri.AbsolutePath == "/" ? "" : uri.AbsolutePath) + uri.Query + uri.Fragment;
+        var host = uri.IsDefaultPort ? uri.Host : uri.Authority;
+        return path.Length > 15 ? host + path.Substring(0, 13) + "..." : host + path;
     }
 
     private unsafe string GetString(Span<byte> utf8Text, long start, long end)
