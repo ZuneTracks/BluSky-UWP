@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using FishyFlip.Lexicon.Com.Atproto.Moderation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -10,14 +9,23 @@ internal record ReportPostResult(string ReasonType, string Details);
 
 internal static class ReportPostDialog
 {
+    // Bluesky's moderation service rejects the legacy com.atproto.moderation.defs reasons.
+    private const string Ozone = "tools.ozone.report.defs#";
+
     private static readonly (string Label, string ReasonType)[] Reasons =
     [
-        ("Spam", ReasonType.ReasonSpam),
-        ("Misleading or impersonation", ReasonType.ReasonMisleading),
-        ("Unwanted sexual content", ReasonType.ReasonSexual),
-        ("Anti-social behaviour or harassment", ReasonType.ReasonRude),
-        ("Breaks community guidelines or the law", ReasonType.ReasonViolation),
-        ("Something else", ReasonType.ReasonOther),
+        ("Spam", Ozone + "reasonMisleadingSpam"),
+        ("Scam", Ozone + "reasonMisleadingScam"),
+        ("Impersonation or fake account", Ozone + "reasonMisleadingImpersonation"),
+        ("Misleading content", Ozone + "reasonMisleadingOther"),
+        ("Harassment, trolling or intolerance", Ozone + "reasonHarassmentOther"),
+        ("Hate speech", Ozone + "reasonHarassmentHateSpeech"),
+        ("Violence or threats", Ozone + "reasonViolenceOther"),
+        ("Unlabelled adult content", Ozone + "reasonSexualUnlabeled"),
+        ("Self-harm", Ozone + "reasonSelfHarmOther"),
+        ("Child safety", Ozone + "reasonChildSafetyOther"),
+        ("Breaks site rules", Ozone + "reasonRuleOther"),
+        ("Something else", Ozone + "reasonOther"),
     ];
 
     /// <summary>
