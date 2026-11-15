@@ -270,7 +270,7 @@ public class FacetHelpers
         var uriFacets = ForUris(post);
         var hashtagFacets = ForHashtags(post);
         var mentionFacets = ForMentions(post, actors ?? []);
-        return [.. uriFacets, .. hashtagFacets, .. mentionFacets];
+        return Normalize([.. uriFacets, .. hashtagFacets, .. mentionFacets]);
     }
 
     /// <summary>
@@ -284,7 +284,24 @@ public class FacetHelpers
         var uriFacets = ForUris(post);
         var hashtagFacets = ForHashtags(post);
         var mentionFacets = ForMentions(post, actors ?? []);
-        return [.. uriFacets, .. hashtagFacets, .. mentionFacets];
+        return Normalize([.. uriFacets, .. hashtagFacets, .. mentionFacets]);
+    }
+
+    // Sort facets into text order and drop empty or overlapping ones, as other clients expect.
+    private static Facet[] Normalize(IEnumerable<Facet> facets)
+    {
+        var result = new List<Facet>();
+        long end = 0;
+        foreach (var facet in facets.OrderBy(f => f.Index!.ByteStart))
+        {
+            if (facet.Index!.ByteEnd <= facet.Index.ByteStart || facet.Index.ByteStart < end)
+                continue;
+
+            result.Add(facet);
+            end = facet.Index.ByteEnd;
+        }
+
+        return [.. result];
     }
 
 

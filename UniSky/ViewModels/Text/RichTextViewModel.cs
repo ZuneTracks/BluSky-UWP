@@ -55,7 +55,11 @@ public class RichTextViewModel
     {
         this.text = text;
         this.utf8Text = UTF8NoBom.GetBytes(text);
-        this.rawFacets = [.. facets];
+        // Facets aren't guaranteed to be in text order (older BluSky builds wrote links first).
+        this.rawFacets = [.. facets
+            .Where(f => f?.Index != null)
+            .OrderBy(f => f.Index.ByteStart)
+            .ThenBy(f => f.Index.ByteEnd)];
 
         this.Facets = ParseFacets();
     }
@@ -71,6 +75,10 @@ public class RichTextViewModel
             var facet = rawFacets[i];
             var start = facet.Index!.ByteStart;
             var end = facet.Index!.ByteEnd;
+
+            // Skip overlapping or out-of-range facets rather than repeating text.
+            if (start < idx || start >= end || end > utf8Span.Length)
+                continue;
 
             // we have some leading text
             if (idx < start)
