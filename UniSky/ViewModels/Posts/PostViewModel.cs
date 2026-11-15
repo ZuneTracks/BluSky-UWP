@@ -312,6 +312,32 @@ public partial class PostViewModel : ViewModelBase, IRoutable
     }
 
     [RelayCommand]
+    private async Task TranslateAsync()
+    {
+        var language = Windows.Globalization.ApplicationLanguages.Languages.FirstOrDefault() ?? "en";
+        // Google Translate wants bare language codes, except for Chinese variants.
+        if (!language.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+            language = language.Split('-')[0];
+
+        var url = "https://translate.google.com/?sl=auto&tl=" + System.Uri.EscapeDataString(language)
+            + "&op=translate&text=" + System.Uri.EscapeDataString(Post.Text ?? "");
+        await Windows.System.Launcher.LaunchUriAsync(new System.Uri(url));
+    }
+
+    [RelayCommand]
+    private Task MuteWordsAsync()
+        => MuteWordsDialog.ShowAsync();
+
+    [RelayCommand]
+    private async Task EditInteractionSettingsAsync()
+    {
+        if (!IsMine)
+            return;
+
+        await InteractionSettingsDialog.ShowAsync(Uri, Post.Reply != null);
+    }
+
+    [RelayCommand]
     private async Task ReportAsync()
     {
         if (IsMine)

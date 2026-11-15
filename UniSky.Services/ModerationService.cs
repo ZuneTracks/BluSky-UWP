@@ -161,6 +161,67 @@ public class ModerationService(
         }
     }
 
+    public async Task<IReadOnlyList<MutedWord>> GetMutedWordsAsync()
+    {
+        var preferences = (await protocolService.Protocol.GetPreferencesAsync().ConfigureAwait(false))
+            .HandleResult()?.Preferences ?? [];
+
+        return [.. preferences.OfType<MutedWordsPref>().SelectMany(p => p.Items ?? [])];
+    }
+
+    public Task AddMutedWordAsync(MutedWord word)
+        => UpdateMutedWordsAsync(words =>
+        {
+            if (words.Any(w => string.Equals(w.Value, word.Value, StringComparison.OrdinalIgnoreCase)))
+                return false;
+
+            words.Add(word);
+            return true;
+        });
+
+    public Task RemoveMutedWordAsync(MutedWord word)
+        => UpdateMutedWordsAsync(words =>
+            words.RemoveAll(w => word.Id != null ? w.Id == word.Id : w.Value == word.Value) > 0);
+
+    private async Task UpdateMutedWordsAsync(Func<List<MutedWord>, bool> update)
+    {
+        await preferencesLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            var protocol = protocolService.Protocol;
+            var preferences = ((await protocol.GetPreferencesAsync().ConfigureAwait(false))
+                .HandleResult()?.Preferences ?? []).ToList();
+
+            // Merge any duplicate prefs into one, as the official client does.
+            var words = preferences.OfType<MutedWordsPref>().SelectMany(p => p.Items ?? []).ToList();
+            if (!update(words))
+                return;
+
+            preferences.RemoveAll(p => p is MutedWordsPref);
+            preferences.Add(new MutedWordsPref(words));
+
+            (await protocol.PutPreferencesAsync(preferences).ConfigureAwait(false))
+                .HandleResult();
+
+            if (ModerationOptions is { } options)
+            {
+                foreach (var w in words)
+                    w.ActorTarget ??= "all";
+
+                ModerationOptions = options with
+                {
+                    Prefs = options.Prefs with { MutedWords = words }
+                };
+
+                _ = Task.Run(SaveCacheAsync);
+            }
+        }
+        finally
+        {
+            preferencesLock.Release();
+        }
+    }
+
     private async Task SaveCacheAsync()
     {
         try

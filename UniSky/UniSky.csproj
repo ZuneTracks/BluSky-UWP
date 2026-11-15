@@ -483,6 +483,8 @@
     <Compile Include="ViewModels\Lists\ListMemberCollection.cs" />
     <Compile Include="Controls\Lists\AddToListsDialog.cs" />
     <Compile Include="Controls\Lists\EditListDialog.cs" />
+    <Compile Include="Controls\Moderation\InteractionSettingsDialog.cs" />
+    <Compile Include="Controls\Moderation\MuteWordsDialog.cs" />
     <Compile Include="Controls\Moderation\ReportPostDialog.cs" />
     <Compile Include="ViewModels\Lists\ListActions.cs" />
     <Compile Include="ViewModels\Lists\ListMemberViewModel.cs" />
