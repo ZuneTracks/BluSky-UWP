@@ -428,6 +428,7 @@
     <Compile Include="ViewModels\Compose\ComposeViewAttachmentViewModel.cs" />
     <Compile Include="ViewModels\Compose\ComposeViewLinkCardViewModel.cs" />
     <Compile Include="ViewModels\Compose\ComposeViewModel.cs" />
+    <Compile Include="ViewModels\Compose\MentionSuggestion.cs" />
     <Compile Include="ViewModels\Error\ExceptionViewModel.cs" />
     <Compile Include="ViewModels\Gallery\GalleryViewModel.cs" />
     <Compile Include="ViewModels\MenuItems\MenuItemViewModel.cs" />

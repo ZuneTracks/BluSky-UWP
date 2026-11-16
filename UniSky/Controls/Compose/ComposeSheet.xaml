@@ -294,6 +294,10 @@
                 </Grid>
                 
                 <Grid Grid.Row="1" MinHeight="100">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -315,7 +319,44 @@
                              Text="{x:Bind ViewModel.Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                              PlaceholderText="What's happening?" 
                              MaxLength="300" 
-                             Paste="PrimaryTextBox_Paste"/>
+                             Paste="PrimaryTextBox_Paste"
+                             TextChanged="PrimaryTextBox_TextChanged"/>
+
+                    <ListView x:Name="MentionSuggestionsList"
+                              Grid.Row="1"
+                              Grid.Column="1"
+                              Visibility="Collapsed"
+                              MaxHeight="240"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemClick="MentionSuggestionsList_ItemClick"
+                              BorderBrush="{ThemeResource SystemControlSeparatorBrush}"
+                              extensions:Hairline.BorderThickness="1">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="compose:MentionSuggestion">
+                                <Grid Padding="0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <muxc:PersonPicture Width="32"
+                                                        Height="32"
+                                                        Margin="0,0,10,0"
+                                                        DisplayName="{x:Bind DisplayName}"
+                                                        ProfilePicture="{x:Bind Avatar}"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{x:Bind DisplayName}"
+                                                   FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{x:Bind AtHandle}"
+                                                   FontSize="12"
+                                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </Grid>
 
                 <Grid Grid.Row="2"
@@ -447,7 +488,8 @@
                         Margin="0,0,2,0"/>
                 <Button Style="{ThemeResource IconButtonStyle}"
                         Content="&#xE910;"
-                        Margin="0,0,2,0"/>
+                        Margin="0,0,2,0"
+                        Click="MentionButton_Click"/>
             </StackPanel>
 
             <toolkit:RadialProgressBar Grid.Column="1"
