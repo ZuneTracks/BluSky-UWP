@@ -1,10 +1,13 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using UniSky.Controls.Lists;
+using UniSky.Controls.Moderation;
 using UniSky.Navigation;
 using UniSky.Helpers;
 using UniSky.Services;
 using UniSky.Services.Navigation;
 using UniSky.ViewModels.Chats;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.UI.Xaml;
@@ -133,6 +136,129 @@ public sealed partial class ChatsPage : Page, IScrollToTop, IRefreshOnShow
 
     private async void LoadMoreFollowers_Click(object sender, RoutedEventArgs e)
         => await ViewModel.LoadMoreFollowersAsync();
+
+    private void ChatsTab_Click(object sender, RoutedEventArgs e)
+        => SetInbox(showRequests: false);
+
+    private void RequestsTab_Click(object sender, RoutedEventArgs e)
+        => SetInbox(showRequests: true);
+
+    private void SetInbox(bool showRequests)
+    {
+        ConversationsList.SelectedItem = null;
+        ViewModel.ShowRequests = showRequests;
+
+        // clicking the active tab would otherwise uncheck it
+        ChatsTabButton.IsChecked = !showRequests;
+        RequestsTabButton.IsChecked = showRequests;
+        UpdateChatLayout();
+    }
+
+    private void ViewProfile_Click(object sender, RoutedEventArgs e)
+        => ViewModel.ViewProfile();
+
+    private async void ToggleMute_Click(object sender, RoutedEventArgs e)
+        => await RunActionAsync("Couldn't update mute setting", ViewModel.ToggleMuteAsync);
+
+    private async void AcceptRequest_Click(object sender, RoutedEventArgs e)
+        => await RunActionAsync("Couldn't accept request", ViewModel.AcceptRequestAsync);
+
+    private async void LeaveConversation_Click(object sender, RoutedEventArgs e)
+    {
+        var conversation = ViewModel.SelectedConversation;
+        if (conversation is null)
+            return;
+
+        var isRequest = conversation.IsRequest;
+        if (!await ListDialogs.ConfirmAsync(
+            isRequest ? "Delete request?" : "Leave conversation?",
+            "You won't see this conversation anymore. The other person will still be able to see it.",
+            isRequest ? "Delete" : "Leave"))
+            return;
+
+        ConversationsList.SelectedItem = null;
+        await RunActionAsync("Couldn't leave conversation", ViewModel.LeaveConversationAsync);
+        UpdateChatLayout();
+    }
+
+    private async void BlockAccount_Click(object sender, RoutedEventArgs e)
+    {
+        var conversation = ViewModel.SelectedConversation;
+        if (conversation is null)
+            return;
+
+        var name = string.IsNullOrWhiteSpace(conversation.Handle) ? conversation.DisplayName : "@" + conversation.Handle.TrimStart('@');
+        if (!await ListDialogs.ConfirmAsync(
+            $"Block {name}?",
+            "Blocked accounts can't message you, reply to your posts, mention you, or interact with you.",
+            "Block"))
+            return;
+
+        await RunActionAsync("Couldn't block account", ViewModel.BlockAsync);
+        UpdateChatLayout();
+    }
+
+    private async void ReactMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem { Tag: ChatMessageViewModel message } item)
+            await RunActionAsync("Couldn't add reaction", () => ViewModel.ToggleReactionAsync(message, item.Text));
+    }
+
+    private void CopyMessage_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuFlyoutItem { Tag: ChatMessageViewModel message })
+            return;
+
+        var package = new DataPackage();
+        package.SetText(message.Text ?? string.Empty);
+        Clipboard.SetContent(package);
+    }
+
+    private async void DeleteMessage_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuFlyoutItem { Tag: ChatMessageViewModel message })
+            return;
+
+        if (!await ListDialogs.ConfirmAsync(
+            "Delete message?",
+            "This message will be deleted for you. The other person will still be able to see it.",
+            "Delete"))
+            return;
+
+        await RunActionAsync("Couldn't delete message", () => ViewModel.DeleteMessageForSelfAsync(message));
+    }
+
+    private async void ReportMessage_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuFlyoutItem { Tag: ChatMessageViewModel message })
+            return;
+
+        var report = await ReportPostDialog.ShowAsync("message");
+        if (report is null)
+            return;
+
+        try
+        {
+            await ViewModel.ReportMessageAsync(message, report.ReasonType, report.Details);
+            await ReportPostDialog.ShowSubmittedAsync();
+        }
+        catch (System.Exception exception)
+        {
+            await ListDialogs.ShowErrorAsync("Couldn't send report", exception);
+        }
+    }
+
+    private static async Task RunActionAsync(string errorTitle, System.Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch (System.Exception exception)
+        {
+            await ListDialogs.ShowErrorAsync(errorTitle, exception);
+        }
+    }
 
     private void BackToConversations_Click(object sender, RoutedEventArgs e)
     {

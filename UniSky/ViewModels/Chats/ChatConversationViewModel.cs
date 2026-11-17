@@ -15,9 +15,22 @@ public sealed partial class ChatConversationViewModel : ObservableObject
         Preview = conversation.LastMessage;
         Timestamp = conversation.LastMessageAt?.ToLocalTime().ToString("g") ?? string.Empty;
         UnreadCount = conversation.UnreadCount;
+        OtherDid = conversation.OtherDid;
+        IsMuted = conversation.IsMuted;
+        IsRequest = conversation.IsRequest;
     }
 
     public string Id { get; }
+    public string OtherDid { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MuteLabel))]
+    private bool isMuted;
+
+    [ObservableProperty]
+    private bool isRequest;
+
+    public string MuteLabel => IsMuted ? "Unmute conversation" : "Mute conversation";
     public string DisplayName { get; }
     public string Handle { get; }
     public string Avatar { get; }

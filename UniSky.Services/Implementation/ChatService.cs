@@ -15,12 +15,20 @@ namespace UniSky.Services;
 public sealed class ChatService(
     IProtocolService protocolService) : IChatService
 {
-    public async Task<ChatConversationPage> FetchConversationsAsync(
+    public Task<ChatConversationPage> FetchConversationsAsync(
         string cursor, int limit, CancellationToken cancellationToken = default)
+        => FetchConversationsAsync("accepted", cursor, limit, cancellationToken);
+
+    public Task<ChatConversationPage> FetchRequestsAsync(
+        string cursor, int limit, CancellationToken cancellationToken = default)
+        => FetchConversationsAsync("request", cursor, limit, cancellationToken);
+
+    private async Task<ChatConversationPage> FetchConversationsAsync(
+        string status, string cursor, int limit, CancellationToken cancellationToken)
     {
         var protocol = protocolService.Protocol;
         var response = (await protocol.ChatBskyConvo
-            .ListConvosAsync(limit: Math.Clamp(limit, 1, 100), cursor: cursor, status: "accepted", cancellationToken: cancellationToken)
+            .ListConvosAsync(limit: Math.Clamp(limit, 1, 100), cursor: cursor, status: status, cancellationToken: cancellationToken)
             .ConfigureAwait(false))
             .HandleResult();
 
@@ -153,6 +161,60 @@ public sealed class ChatService(
             .HandleResult();
     }
 
+    public async Task AcceptConversationAsync(string conversationId, CancellationToken cancellationToken = default)
+        => _ = (await protocolService.Protocol.ChatBskyConvo
+            .AcceptConvoAsync(conversationId, cancellationToken)
+            .ConfigureAwait(false))
+            .HandleResult();
+
+    public async Task LeaveConversationAsync(string conversationId, CancellationToken cancellationToken = default)
+        => _ = (await protocolService.Protocol.ChatBskyConvo
+            .LeaveConvoAsync(conversationId, cancellationToken)
+            .ConfigureAwait(false))
+            .HandleResult();
+
+    public async Task SetConversationMutedAsync(string conversationId, bool muted, CancellationToken cancellationToken = default)
+    {
+        var convo = protocolService.Protocol.ChatBskyConvo;
+        if (muted)
+            _ = (await convo.MuteConvoAsync(conversationId, cancellationToken).ConfigureAwait(false)).HandleResult();
+        else
+            _ = (await convo.UnmuteConvoAsync(conversationId, cancellationToken).ConfigureAwait(false)).HandleResult();
+    }
+
+    public async Task<ChatMessage> SetReactionAsync(
+        string conversationId, string messageId, string value, bool add, CancellationToken cancellationToken = default)
+    {
+        var convo = protocolService.Protocol.ChatBskyConvo;
+        var message = add
+            ? (await convo.AddReactionAsync(conversationId, messageId, value, cancellationToken).ConfigureAwait(false)).HandleResult()?.Message
+            : (await convo.RemoveReactionAsync(conversationId, messageId, value, cancellationToken).ConfigureAwait(false)).HandleResult()?.Message;
+
+        return message is null ? null : ToMessage(message);
+    }
+
+    public async Task DeleteMessageForSelfAsync(string conversationId, string messageId, CancellationToken cancellationToken = default)
+        => _ = (await protocolService.Protocol.ChatBskyConvo
+            .DeleteMessageForSelfAsync(conversationId, messageId, cancellationToken)
+            .ConfigureAwait(false))
+            .HandleResult();
+
+    public async Task ReportMessageAsync(
+        string senderDid, string conversationId, string messageId, string reasonType, string details, CancellationToken cancellationToken = default)
+    {
+        var subject = new MessageRef(new ATDid(senderDid), conversationId, messageId);
+        _ = (await protocolService.Protocol.Moderation
+            .CreateReportAsync(reasonType, subject, details, cancellationToken: cancellationToken)
+            .ConfigureAwait(false))
+            .HandleResult();
+    }
+
+    public async Task BlockAsync(string did, CancellationToken cancellationToken = default)
+        => _ = (await protocolService.Protocol.Graph
+            .CreateBlockAsync(new ATDid(did), DateTime.UtcNow, cancellationToken: cancellationToken)
+            .ConfigureAwait(false))
+            .HandleResult();
+
     private static bool IsDirectConversation(ConvoView conversation, string myDid)
         => conversation?.Members?.Count == 2 &&
            !string.IsNullOrWhiteSpace(conversation.Id) &&
@@ -178,6 +240,9 @@ public sealed class ChatService(
                 ?? (conversation.LastMessage is null ? "No messages yet" : "Last message unavailable"),
             LastMessageAt = lastMessage?.SentAt,
             UnreadCount = conversation.UnreadCount,
+            OtherDid = otherMember.Did?.ToString(),
+            IsMuted = conversation.Muted,
+            IsRequest = string.Equals(conversation.Status, "request", StringComparison.OrdinalIgnoreCase),
         };
     }
 
@@ -188,5 +253,13 @@ public sealed class ChatService(
             Text = string.IsNullOrWhiteSpace(message.Text) ? "Unsupported message content" : message.Text,
             SenderDid = message.Sender?.Did?.ToString(),
             SentAt = message.SentAt,
+            Reactions = (message.Reactions ?? [])
+                .Where(reaction => !string.IsNullOrEmpty(reaction?.Value))
+                .Select(reaction => new ChatReaction
+                {
+                    Value = reaction.Value,
+                    SenderDid = reaction.Sender?.Did?.ToString(),
+                })
+                .ToList(),
         };
 }

@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FishyFlip;
+using FishyFlip.Models;
 using Microsoft.Extensions.Logging;
+using UniSky.Navigation;
 using UniSky.Services;
 using UniSky.Services.Navigation;
 using UniSky.Helpers;
@@ -90,6 +92,32 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
     [ObservableProperty]
     private bool isFollowersEmpty;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowChats))]
+    [NotifyPropertyChangedFor(nameof(EmptyListTitle))]
+    [NotifyPropertyChangedFor(nameof(EmptyListMessage))]
+    private bool showRequests;
+
+    [ObservableProperty]
+    private string requestsLabel = "Requests";
+
+    public bool ShowChats => !ShowRequests;
+
+    public string EmptyListTitle => ShowRequests ? "No message requests" : "No direct messages yet";
+    public string EmptyListMessage => ShowRequests
+        ? "Messages from people you don't follow will appear here."
+        : "When a one-to-one conversation starts, it will appear here.";
+
+    partial void OnShowRequestsChanged(bool value)
+        => _ = SwitchInboxAsync();
+
+    private async Task SwitchInboxAsync()
+    {
+        SelectedConversation = null;
+        await dispatcher.RunAsync(CoreDispatcherPriority.Normal, Messages.Clear);
+        await RefreshConversationsAsync(waitForLock: true).ConfigureAwait(false);
+    }
+
     public bool HasSelectedConversation => SelectedConversation != null;
     public bool CanSend => HasSelectedConversation && !IsSending && !string.IsNullOrWhiteSpace(Draft);
     public bool CanStartConversation => !IsStartingConversation && !string.IsNullOrWhiteSpace(Recipient);
@@ -111,6 +139,7 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
     {
         var selectedId = SelectedConversation?.Id;
         await RefreshConversationsAsync().ConfigureAwait(false);
+        _ = UpdateRequestCountAsync();
 
         if (string.IsNullOrWhiteSpace(selectedId))
             return;
@@ -144,6 +173,141 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
 
     public void CloseConversation()
         => SelectedConversation = null;
+
+    private async Task UpdateRequestCountAsync()
+    {
+        try
+        {
+            var page = await chatService.FetchRequestsAsync(null, 100).ConfigureAwait(false);
+            var count = page.Conversations.Count;
+            var label = count == 0
+                ? "Requests"
+                : $"Requests ({count}{(string.IsNullOrWhiteSpace(page.Cursor) ? "" : "+")})";
+            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => RequestsLabel = label);
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Failed to fetch message requests");
+        }
+    }
+
+    public async Task AcceptRequestAsync()
+    {
+        var conversation = SelectedConversation;
+        if (conversation is null || !conversation.IsRequest)
+            return;
+
+        await chatService.AcceptConversationAsync(conversation.Id).ConfigureAwait(false);
+        await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+        {
+            conversation.IsRequest = false;
+            RemoveConversationFromRequests(conversation);
+        });
+        _ = UpdateRequestCountAsync();
+    }
+
+    public async Task LeaveConversationAsync()
+    {
+        var conversation = SelectedConversation;
+        if (conversation is null)
+            return;
+
+        await chatService.LeaveConversationAsync(conversation.Id).ConfigureAwait(false);
+        await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+        {
+            if (SelectedConversation?.Id == conversation.Id)
+            {
+                SelectedConversation = null;
+                Messages.Clear();
+            }
+
+            RemoveConversation(conversation);
+        });
+
+        if (conversation.IsRequest)
+            _ = UpdateRequestCountAsync();
+    }
+
+    public async Task ToggleMuteAsync()
+    {
+        var conversation = SelectedConversation;
+        if (conversation is null)
+            return;
+
+        var muted = !conversation.IsMuted;
+        await chatService.SetConversationMutedAsync(conversation.Id, muted).ConfigureAwait(false);
+        await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => conversation.IsMuted = muted);
+    }
+
+    public void ViewProfile()
+    {
+        var did = SelectedConversation?.OtherDid;
+        if (!string.IsNullOrWhiteSpace(did))
+            Navigate(Routes.Profile(new ATDid(did)));
+    }
+
+    public async Task BlockAsync()
+    {
+        var conversation = SelectedConversation;
+        if (string.IsNullOrWhiteSpace(conversation?.OtherDid))
+            return;
+
+        await chatService.BlockAsync(conversation.OtherDid).ConfigureAwait(false);
+
+        // blocking from a request also removes it, like Bluesky web
+        if (conversation.IsRequest)
+            await LeaveConversationAsync().ConfigureAwait(false);
+    }
+
+    public async Task ToggleReactionAsync(ChatMessageViewModel message, string emoji)
+    {
+        if (message is null || string.IsNullOrEmpty(emoji) || string.IsNullOrWhiteSpace(message.ConversationId))
+            return;
+
+        var add = !message.MyReactions.Contains(emoji);
+        var updated = await chatService
+            .SetReactionAsync(message.ConversationId, message.Id, emoji, add)
+            .ConfigureAwait(false);
+        if (updated is not null)
+            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => message.UpdateReactions(updated.Reactions));
+    }
+
+    public async Task DeleteMessageForSelfAsync(ChatMessageViewModel message)
+    {
+        if (message is null || string.IsNullOrWhiteSpace(message.ConversationId))
+            return;
+
+        await chatService.DeleteMessageForSelfAsync(message.ConversationId, message.Id).ConfigureAwait(false);
+        await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+        {
+            Messages.Remove(message);
+            messageIds.Remove(message.Id);
+            IsMessagesEmpty = Messages.Count == 0;
+        });
+    }
+
+    public Task ReportMessageAsync(ChatMessageViewModel message, string reasonType, string details)
+    {
+        if (message is null || message.IsMine || string.IsNullOrWhiteSpace(message.ConversationId))
+            return Task.CompletedTask;
+
+        return chatService.ReportMessageAsync(message.SenderDid, message.ConversationId, message.Id, reasonType, details);
+    }
+
+    private void RemoveConversationFromRequests(ChatConversationViewModel conversation)
+    {
+        if (ShowRequests)
+            RemoveConversation(conversation);
+    }
+
+    private void RemoveConversation(ChatConversationViewModel conversation)
+    {
+        var existing = Conversations.FirstOrDefault(item => item.Id == conversation.Id);
+        if (existing is not null)
+            Conversations.Remove(existing);
+        conversationIds.Remove(conversation.Id);
+        IsConversationListEmpty = Conversations.Count == 0;
+    }
 
     public void ReportFailure(Exception exception)
         => SetErrored(exception);
@@ -247,6 +411,12 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
                     Messages.Add(message);
 
                 conversation.UpdateLastMessage(sent);
+                if (conversation.IsRequest)
+                {
+                    conversation.IsRequest = false;
+                    RemoveConversationFromRequests(conversation);
+                    _ = UpdateRequestCountAsync();
+                }
                 if (string.Equals(Draft?.Trim(), text, StringComparison.Ordinal))
                     Draft = string.Empty;
             });
@@ -282,9 +452,11 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
         await LoadMessagesAsync().ConfigureAwait(false);
     }
 
-    private async Task RefreshConversationsAsync()
+    private async Task RefreshConversationsAsync(bool waitForLock = false)
     {
-        if (!await conversationsSemaphore.WaitAsync(0))
+        if (waitForLock)
+            await conversationsSemaphore.WaitAsync().ConfigureAwait(false);
+        else if (!await conversationsSemaphore.WaitAsync(0))
             return;
 
         try
@@ -325,9 +497,12 @@ public sealed partial class ChatsPageViewModel : ViewModelBase
         try
         {
             var added = 0;
+            var requests = ShowRequests;
             for (var attempt = 0; !conversationsExhausted && added == 0 && attempt < MaxPageAttempts; attempt++)
             {
-                var page = await chatService.FetchConversationsAsync(conversationsCursor, PageSize).ConfigureAwait(false);
+                var page = requests
+                    ? await chatService.FetchRequestsAsync(conversationsCursor, PageSize).ConfigureAwait(false)
+                    : await chatService.FetchConversationsAsync(conversationsCursor, PageSize).ConfigureAwait(false);
                 conversationsCursor = page.Cursor;
                 conversationsExhausted = string.IsNullOrWhiteSpace(conversationsCursor);
 

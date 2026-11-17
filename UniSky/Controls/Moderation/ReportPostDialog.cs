@@ -31,11 +31,11 @@ internal static class ReportPostDialog
     /// <summary>
     /// Asks why the post is being reported. Returns null if the user cancels.
     /// </summary>
-    public static async Task<ReportPostResult> ShowAsync()
+    public static async Task<ReportPostResult> ShowAsync(string subject = "post")
     {
         var reasons = new ComboBox
         {
-            Header = "Why are you reporting this post?",
+            Header = $"Why are you reporting this {subject}?",
             HorizontalAlignment = HorizontalAlignment.Stretch,
             PlaceholderText = "Choose a reason"
         };
@@ -59,7 +59,7 @@ internal static class ReportPostDialog
 
         var dialog = new ContentDialog
         {
-            Title = "Report post",
+            Title = $"Report {subject}",
             Content = panel,
             PrimaryButtonText = "Report",
             SecondaryButtonText = "Cancel",

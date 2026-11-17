@@ -21,22 +21,57 @@
 
         <DataTemplate x:Key="ChatMessageTemplate"
                       x:DataType="chats:ChatMessageViewModel">
-            <Grid Padding="16,8">
+            <Grid Padding="16,8"
+                  Background="Transparent">
+                <Grid.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutSubItem Text="React">
+                            <MenuFlyoutItem Text="👍" Tag="{x:Bind}" Click="ReactMenuItem_Click"/>
+                            <MenuFlyoutItem Text="😆" Tag="{x:Bind}" Click="ReactMenuItem_Click"/>
+                            <MenuFlyoutItem Text="❤️" Tag="{x:Bind}" Click="ReactMenuItem_Click"/>
+                            <MenuFlyoutItem Text="👀" Tag="{x:Bind}" Click="ReactMenuItem_Click"/>
+                            <MenuFlyoutItem Text="😢" Tag="{x:Bind}" Click="ReactMenuItem_Click"/>
+                        </MenuFlyoutSubItem>
+                        <MenuFlyoutItem Text="Copy message text"
+                                        Tag="{x:Bind}"
+                                        Click="CopyMessage_Click"/>
+                        <MenuFlyoutSeparator/>
+                        <MenuFlyoutItem Text="Delete for me"
+                                        Tag="{x:Bind}"
+                                        Click="DeleteMessage_Click"/>
+                        <MenuFlyoutItem Text="Report message"
+                                        Tag="{x:Bind}"
+                                        Click="ReportMessage_Click"
+                                        Visibility="{x:Bind IsNotMine, Converter={StaticResource VisibilityConverter}}"/>
+                    </MenuFlyout>
+                </Grid.ContextFlyout>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="{Binding SenderLabel}"
+                <TextBlock Text="{x:Bind SenderLabel}"
                            Style="{ThemeResource CaptionTextBlockStyle}"/>
-                <TextBlock Text="{Binding Text}"
+                <TextBlock Text="{x:Bind Text}"
                            Grid.Row="1"
                            Margin="0,2,0,0"
                            TextWrapping="WrapWholeWords"
+                           IsTextSelectionEnabled="False"
                            Style="{ThemeResource BodyTextBlockStyle}"/>
-                <TextBlock Grid.Row="2"
+                <Border Grid.Row="2"
+                        Margin="0,4,0,0"
+                        Padding="8,2"
+                        HorizontalAlignment="Left"
+                        CornerRadius="10"
+                        Background="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                        Visibility="{x:Bind HasReactions, Mode=OneWay, Converter={StaticResource VisibilityConverter}}">
+                    <TextBlock Text="{x:Bind ReactionSummary, Mode=OneWay}"
+                               automation:AutomationProperties.Name="Reactions"/>
+                </Border>
+                <TextBlock Grid.Row="3"
                            Margin="0,4,0,0"
-                           Text="{Binding Timestamp}"
+                           Text="{x:Bind Timestamp}"
                            Style="{ThemeResource CaptionTextBlockStyle}"/>
             </Grid>
         </DataTemplate>
@@ -89,9 +124,23 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Margin="16,16,16,8"
-                               Text="Direct messages"
-                               Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                    <StackPanel Margin="16,16,16,8">
+                        <TextBlock Text="Direct messages"
+                                   Style="{ThemeResource SubtitleTextBlockStyle}"/>
+                        <StackPanel Margin="0,8,0,0"
+                                    Orientation="Horizontal">
+                            <ToggleButton x:Name="ChatsTabButton"
+                                          Content="Chats"
+                                          IsChecked="{x:Bind ViewModel.ShowChats, Mode=OneWay}"
+                                          Click="ChatsTab_Click"/>
+                            <ToggleButton x:Name="RequestsTabButton"
+                                          Margin="8,0,0,0"
+                                          Content="{x:Bind ViewModel.RequestsLabel, Mode=OneWay}"
+                                          IsChecked="{x:Bind ViewModel.ShowRequests, Mode=OneWay}"
+                                          Click="RequestsTab_Click"
+                                          automation:AutomationProperties.Name="Message requests"/>
+                        </StackPanel>
+                    </StackPanel>
                     <Grid Grid.Row="1"
                           Margin="16,0,16,8">
                         <Grid.ColumnDefinitions>
@@ -145,11 +194,11 @@
                                 Margin="24,64,24,0"
                                 VerticalAlignment="Top"
                                 Visibility="{x:Bind ViewModel.IsConversationListEmpty, Mode=OneWay, Converter={StaticResource VisibilityConverter}}">
-                        <TextBlock Text="No direct messages yet"
+                        <TextBlock Text="{x:Bind ViewModel.EmptyListTitle, Mode=OneWay}"
                                    Style="{ThemeResource TitleTextBlockStyle}"
                                    TextWrapping="Wrap"/>
                         <TextBlock Margin="0,8,0,0"
-                                   Text="When an accepted one-to-one conversation starts, it will appear here."
+                                   Text="{x:Bind ViewModel.EmptyListMessage, Mode=OneWay}"
                                    Style="{ThemeResource BodyTextBlockStyle}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -162,22 +211,56 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Margin="20,16,20,8">
+                    <Grid Margin="20,16,12,8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         <Button x:Name="BackToConversationsButton"
                                 HorizontalAlignment="Left"
                                 Margin="0,0,0,8"
                                 Content="Back to conversations"
                                 Click="BackToConversations_Click"
                                 Visibility="Visible"/>
-                        <TextBlock Text="{x:Bind ViewModel.SelectedConversation.DisplayName, Mode=OneWay}"
+                        <TextBlock Grid.Row="1"
+                                   Text="{x:Bind ViewModel.SelectedConversation.DisplayName, Mode=OneWay}"
                                    Style="{ThemeResource SubtitleTextBlockStyle}"
                                    TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{x:Bind ViewModel.SelectedConversation.Handle, Mode=OneWay}"
+                        <TextBlock Grid.Row="2"
+                                   Text="{x:Bind ViewModel.SelectedConversation.Handle, Mode=OneWay}"
                                    Style="{ThemeResource CaptionTextBlockStyle}"
                                    TextTrimming="CharacterEllipsis"/>
-                    </StackPanel>
+                        <Button Grid.Row="1"
+                                Grid.RowSpan="2"
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                Content="&#xE712;"
+                                FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                automation:AutomationProperties.Name="Conversation options">
+                            <Button.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutItem Text="View profile"
+                                                    Click="ViewProfile_Click"/>
+                                    <MenuFlyoutItem Text="{x:Bind ViewModel.SelectedConversation.MuteLabel, Mode=OneWay}"
+                                                    Click="ToggleMute_Click"/>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutItem Text="Block account"
+                                                    Click="BlockAccount_Click"/>
+                                    <MenuFlyoutItem Text="Leave conversation"
+                                                    Click="LeaveConversation_Click"/>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
 
                     <Grid Grid.Row="1">
                         <Grid.RowDefinitions>
@@ -210,7 +293,29 @@
                         </StackPanel>
                     </Grid>
 
-                    <Grid Grid.Row="2"
+                    <StackPanel Grid.Row="2"
+                                Padding="16,12"
+                                BorderBrush="{ThemeResource SystemControlRevealSeparatorBrush}"
+                                extensions:Hairline.BorderThickness="0,1,0,0"
+                                Visibility="{x:Bind ViewModel.SelectedConversation.IsRequest, Mode=OneWay, Converter={StaticResource VisibilityConverter}}">
+                        <TextBlock Text="This is a message request. Accept it to reply, or delete it to remove the conversation."
+                                   Style="{ThemeResource BodyTextBlockStyle}"
+                                   TextWrapping="Wrap"/>
+                        <StackPanel Margin="0,8,0,0"
+                                    Orientation="Horizontal">
+                            <Button Content="Accept"
+                                    Style="{ThemeResource AccentButtonStyle}"
+                                    Click="AcceptRequest_Click"/>
+                            <Button Margin="8,0,0,0"
+                                    Content="Delete"
+                                    Click="LeaveConversation_Click"/>
+                            <Button Margin="8,0,0,0"
+                                    Content="Block"
+                                    Click="BlockAccount_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Grid Grid.Row="3"
                           Padding="16"
                           Background="{ThemeResource GenericPageHeaderBackgroundBrush}">
                         <Grid.ColumnDefinitions>
@@ -251,7 +356,7 @@
                                Style="{ThemeResource TitleTextBlockStyle}"
                                HorizontalAlignment="Center"/>
                     <TextBlock Margin="0,8,0,0"
-                               Text="Accepted one-to-one conversations are supported in this preview."
+                               Text="Choose a conversation from the list, or start a new chat."
                                Style="{ThemeResource BodyTextBlockStyle}"
                                TextAlignment="Center"
                                TextWrapping="Wrap"
