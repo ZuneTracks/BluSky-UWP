@@ -288,7 +288,6 @@
     <Compile Include="Helpers\AngleSharp\CustomHttpClientRequester.cs" />
     <Compile Include="Helpers\Composition\BirdAnimation.cs" />
     <Compile Include="Helpers\FacetHelpers.cs" />
-    <Compile Include="Helpers\PeopleFeedTest.cs" />
     <Compile Include="Helpers\GalleryEmbed.cs" />
     <Compile Include="Helpers\Geometry\CanvasPathBuilderExtensions.cs" />
     <Compile Include="Helpers\Geometry\CanvasPathGeometry.cs" />

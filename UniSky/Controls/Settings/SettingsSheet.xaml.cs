@@ -25,17 +25,6 @@ public sealed partial class SettingsSheet : SheetControl
         this.DataContext = ActivatorUtilities.CreateInstance<SettingsViewModel>(ServiceContainer.Scoped);
     }
 
-    private async void PeopleFeedTest_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-    {
-        var result = await UniSky.Helpers.PeopleFeedTest.RunAsync();
-        await new ContentDialog
-        {
-            Title = "People app feed test",
-            Content = new TextBlock { Text = result, TextWrapping = Windows.UI.Xaml.TextWrapping.Wrap, IsTextSelectionEnabled = true },
-            CloseButtonText = "OK",
-        }.ShowAsync();
-    }
-
     private async void OnHiding(IOverlayControl sender, OverlayHidingEventArgs args)
     {
         if (!ApiInformation.IsMethodPresent(typeof(CoreApplication).FullName, "RequestRestartAsync"))

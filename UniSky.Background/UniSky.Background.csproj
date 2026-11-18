@@ -124,13 +124,7 @@
   <ItemGroup>
     <Compile Include="BadgeBackgroundTask.cs" />
     <Compile Include="NotificationToaster.cs" />
-    <Compile Include="SocialFeedAgent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <SDKReference Include="WindowsMobile, Version=10.0.22621.0">
-      <Name>Windows Mobile Extensions for the UWP</Name>
-    </SDKReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FishyFlip">

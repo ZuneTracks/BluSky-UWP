@@ -91,10 +91,6 @@
                     HorizontalAlignment="Stretch"
                     Margin="0,0,0,4"
                     Command="{Binding OpenProfileSheetCommand}"/>
-            <Button Content="People app feed test"
-                    HorizontalAlignment="Stretch"
-                    Margin="0,0,0,4"
-                    Click="PeopleFeedTest_Click"/>
 
             <TextBlock x:Uid="SettingsAboutHeaderBlock"
                        Style="{ThemeResource SubtitleTextBlockStyle}" Text="About"/>

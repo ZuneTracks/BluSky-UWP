@@ -67,15 +67,11 @@
             <Task Type="general"/>
           </BackgroundTasks>
         </Extension>
-        <uap:Extension Category="windows.appService" EntryPoint="UniSky.Background.SocialFeedAgent">
-          <uap:AppService Name="com.microsoft.windows.social-feeds" />
-        </uap:Extension>
       </Extensions>
     </Application>
   </Applications>
 
   <Capabilities>
     <Capability Name="internetClient" />
-    <uap:Capability Name="contacts" />
   </Capabilities>
 </Package>
